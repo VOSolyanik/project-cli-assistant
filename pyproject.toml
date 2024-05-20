@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "memo-buddy"
+version = "1.0.0"
+description = "CLI assistant to manage contacts and notes."
+readme = "README.md"
+authors = [{ name = "Vitalii Solianyk", email = "v.o.solyanik@gmail.com" }]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["contacts", "notes", "CLI", "assistant"]
+dependencies = [
+    "colorama >= 0.4.6",
+]
+requires-python = ">=3.10"
+
+[project.optional-dependencies]
+dev = ["black", "isort", "flake8", "pytest"]
+
+[project.urls]
+Homepage = "https://github.com/VOSolyanik/project-memo-buddy"
+
+[project.scripts]
+contact-notes-buddy = "memo_buddy.__main__:main"
