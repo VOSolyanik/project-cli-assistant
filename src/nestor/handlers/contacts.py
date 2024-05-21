@@ -22,6 +22,8 @@ class ContactsHandler():
             "add",
             "change",
             "add-birthday",
+            "add-email",
+            "edit-email",
             "show-birthday",
             "birthdays",
             "all"
@@ -48,6 +50,8 @@ class ContactsHandler():
                 return self._get_birthdays()
             case "all":
                 return self.__get_all_contacts()
+            case "add-email" | "edit-email":
+                return self.__edit_email(*args)
             case _:
                 return Colorizer.error("Invalid command.")
     
@@ -103,6 +107,22 @@ class ContactsHandler():
             new_phone = args[2]
             phone.value = new_phone
 
+        return message
+    
+    @input_error({ValueError: "Contact name and email are required"})
+    def __edit_email(self, *args) -> str:
+        """
+        Adds or edits contact email
+        args: list[str] - command arguments
+        """
+        name, email = args
+        record = self.book.find(name)
+        message = Colorizer.success(f"Contact {name} email updated.")
+
+        if record is None:
+            return Colorizer.warn("Contact not found")
+        
+        record.edit_email(email)
         return message
 
     @input_error({ValueError: "Contact name and birthday are required"})

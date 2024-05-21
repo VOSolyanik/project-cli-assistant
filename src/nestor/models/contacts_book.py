@@ -1,7 +1,8 @@
 from typing import Dict
 from collections import UserDict
 from datetime import datetime, timedelta
-from .exceptions import PhoneValueError, BirthdayValueError
+from .exceptions import PhoneValueError, BirthdayValueError, EmailValueError
+import re
 
 class Field:
     """Base class for fields."""
@@ -34,6 +35,21 @@ class Phone(Field):
         
         self._value = value
 
+class Email(Field):
+    format_regexp = r'^\S+@\S+\.\S+$'
+
+    """Class representing a email field."""
+    @property
+    def value(self):
+        return self._value 
+    
+    @value.setter
+    def value(self, value: str):
+        if re.match(Email.format_regexp, value) == None:
+            raise EmailValueError("Wrong email format")
+        
+        self._value = value
+
 class Birthday(Field):
     """Class representing a birthday field."""
     format = '%d.%m.%Y'
@@ -59,9 +75,10 @@ class Contact:
         self.name = Name(name)
         self.phones = []
         self.birthday = None
+        self.email = None
 
     def __str__(self):
-        return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}, birthday: {self.birthday or 'not specified'}"
+        return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}, birthday: {self.birthday or 'not specified'}, email: {self.email or 'not specified'}"
     
     def add_phone(self, phone: str) -> None:
         """Add phone to record if it's valid, otherwise handle ValueError."""
@@ -83,6 +100,10 @@ class Contact:
             if p.value == phone:
                 return p
         return None
+
+    def edit_email(self, new_email: str) -> None:
+        """Edit or add email in record."""
+        self.email = Email(new_email)
     
     def add_birthday(self, birthday: str) -> None:
         """Add birthday to record if it's valid, otherwise handle ValueError."""
