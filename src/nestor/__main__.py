@@ -12,7 +12,7 @@ def parse_input(user_input: str) -> Tuple[str, List[str]]:
     cmd = cmd.strip().lower()
     return cmd, *args
 
-def load_data(filename="address_book.pkl"):
+def load_data(filename="contacts_book.pkl"):
     """
     Loads data from file, returns empty contacts book if file not found
     """
@@ -23,7 +23,7 @@ def load_data(filename="address_book.pkl"):
         # Return empty contacts book if file not found
         return ContactsBook()
 
-def save_data(book, filename="address_book.pkl"):
+def save_data(book, filename="contacts_book.pkl"):
     """
     Saves data to file
     """

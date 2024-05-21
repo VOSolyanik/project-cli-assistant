@@ -3,18 +3,23 @@ requires = ["setuptools>=61.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "memo-buddy"
+name = "nestor"
 version = "1.0.0"
 description = "CLI assistant to manage contacts and notes."
 readme = "README.md"
-authors = [{ name = "Vitalii Solianyk", email = "v.o.solyanik@gmail.com" }]
+authors = [
+    { name = "Vitalii Solianyk", email = "v.o.solyanik@gmail.com" },
+    { name = "Yehor Vialov", email = "stillonline@fastmail.com" },
+    { name = "Andrii Gnedash", email = "andriignedash@gmail.com" },
+    { name = "Andrii Vitiuk", email = "vityuk.andrey@gmail.com" }
+]
 license = { file = "LICENSE" }
 classifiers = [
     "License :: MIT License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
 ]
-keywords = ["contacts", "notes", "CLI", "assistant"]
+keywords = ["contacts", "notes", "CLI", "assistant", "nestor"]
 dependencies = [
     "colorama >= 0.4.6",
 ]
@@ -24,7 +29,7 @@ requires-python = ">=3.10"
 dev = ["black", "isort", "flake8", "pytest"]
 
 [project.urls]
-Homepage = "https://github.com/VOSolyanik/project-memo-buddy"
+Homepage = "https://github.com/VOSolyanik/project-nestor"
 
 [project.scripts]
-contact-notes-buddy = "memo_buddy.__main__:main"
+contact-notes-buddy = "nestor.__main__:main"
