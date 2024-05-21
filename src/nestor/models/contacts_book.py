@@ -106,14 +106,14 @@ class Contact:
 
     def edit_address(self, street: str = None, city: str = None, state: str = None, zip_code: str = None, country: str = None):
         """Edit address"""
-        if self.address:
+        if not self.address:
+            self.address = Address(street, city, state, zip_code, country)
+        else:
             self.address.street = street if street else self.address.street
             self.address.city = city if city else self.address.city
             self.address.state = state if state else self.address.state
             self.address.zip_code = zip_code if zip_code else self.address.zip_code
             self.address.country = country if country else self.address.country
-        else:
-            print("No address to edit")
 
 class ContactsBook(UserDict):
     """Class representing a contacts book."""

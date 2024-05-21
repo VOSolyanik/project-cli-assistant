@@ -54,6 +54,7 @@ class ContactsHandler():
             case "add-address":
                 parsed_args = self._parse_address_args(args)
                 return self.__add_address(*parsed_args)
+                return self.__add_address(*args)
             case "edit-address":
                 parsed_args = self._parse_address_args(args)
                 return self.__edit_address(*parsed_args)
@@ -62,9 +63,7 @@ class ContactsHandler():
             
     @staticmethod
     def _parse_address_args(args: list[str]) -> list[str]:
-        # Объединяем список аргументов в одну строку
         args_str = " ".join(args)
-        # Используем shlex для разбора строки на отдельные аргументы
         lexer = shlex.shlex(args_str, posix=True)
         lexer.whitespace_split = True
         lexer.quotes = '"'
@@ -180,15 +179,14 @@ class ContactsHandler():
         Adds address to contact
         args: list[str] - command arguments
         """
-        print(f"Adding address with arguments: {args}")  # Debug print
         if len(args) != 6:
-            return Colorizer.error("Invalid number of arguments for add-address.")
+            raise AddressValueError("Invalid number of arguments for add-address.")
         name, street, city, state, zip_code, country = args
         contact = self.book.find(name)
         if contact is None:
-            return Colorizer.error(f"Contact with name '{name}' not found.")
+            return Colorizer.error(f"Contact not found")
         contact.add_address(street, city, state, zip_code, country)
-        return Colorizer.success(f"Address for '{name}' added successfully.")
+        return Colorizer.success(f"Contact {name} address added.")
 
     @input_error()
     def __edit_address(self, *args) -> str:
@@ -196,12 +194,11 @@ class ContactsHandler():
         Edits address of contact
         args: list[str] - command arguments
         """
-        print(f"Editing address with arguments: {args}")  # Debug print
         if len(args) != 6:
-            return Colorizer.error("Invalid number of arguments for edit-address.")
+            raise AddressValueError("Invalid number of arguments for edit-address.")
         name, street, city, state, zip_code, country = args
         contact = self.book.find(name)
         if contact is None:
-            return Colorizer.error(f"Contact with name '{name}' not found.")
+            return Colorizer.error(f"Contact not found")
         contact.edit_address(street, city, state, zip_code, country)
-        return Colorizer.success(f"Address for '{name}' updated successfully.")
+        return Colorizer.success(f"Contact {name} address updated successfully.")
