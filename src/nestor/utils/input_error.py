@@ -1,6 +1,6 @@
 from functools import wraps
 from services.colorizer import Colorizer
-from models.exceptions import PhoneValueError, BirthdayValueError
+from models.exceptions import ContactsBookException
 
 def input_error(errors_config: dict = {}):
     """
@@ -20,9 +20,7 @@ def input_error(errors_config: dict = {}):
                 return func(*args, **kwargs)
             except KeyError as e:
                 return Colorizer.error(f"Contact {e} not found")
-            except PhoneValueError as e:
-                return Colorizer.error(e)
-            except BirthdayValueError as e:
+            except ContactsBookException as e:
                 return Colorizer.error(e)
             except ValueError as e:
                 return Colorizer.error(errors[ValueError])
