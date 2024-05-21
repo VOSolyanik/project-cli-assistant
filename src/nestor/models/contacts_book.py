@@ -45,7 +45,7 @@ class Email(Field):
     
     @value.setter
     def value(self, value: str):
-        if re.match(Email.format_regexp, value) == None:
+        if re.match(Email.format_regexp, value) is None:
             raise EmailValueError("Wrong email format")
         
         self._value = value
@@ -70,6 +70,8 @@ class Birthday(Field):
             raise BirthdayValueError("Invalid date format. Use DD.MM.YYYY") from exc
     
 class Contact:
+    NOT_SPECIFIED_FIELD_VALUE = 'not specified'
+
     """Contact class for storing contact information."""
     def __init__(self, name):
         self.name = Name(name)
@@ -78,7 +80,7 @@ class Contact:
         self.email = None
 
     def __str__(self):
-        return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}, birthday: {self.birthday or 'not specified'}, email: {self.email or 'not specified'}"
+        return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}, birthday: {self.birthday or Contact.NOT_SPECIFIED_FIELD_VALUE}, email: {self.email or Contact.NOT_SPECIFIED_FIELD_VALUE}"
     
     def add_phone(self, phone: str) -> None:
         """Add phone to record if it's valid, otherwise handle ValueError."""
@@ -101,22 +103,11 @@ class Contact:
                 return p
         return None
 
-    def add_email(self, new_email: str) -> None:
-        """Add email to record if not exist."""
-        if self.email != None:
-            raise EmailValueError(f"Email already exist for {self.name}")
-
-        self.email = Email(new_email)
-
     def edit_email(self, new_email: str) -> None:
         """Edit email in record."""
         self.email = Email(new_email)
 
     def remove_email(self) -> None:
-        """Remove email from record."""
-        if self.email == None:
-            raise EmailValueError(f"Contact {self.name} has no email set")
-        
         self.email = None
     
     def add_birthday(self, birthday: str) -> None:
