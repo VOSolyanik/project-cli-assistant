@@ -141,6 +141,17 @@ class Contact:
             self.address.zip_code = zip_code if zip_code else self.address.zip_code
             self.address.country = country if country else self.address.country
 
+    def add_field(self, field: Field) -> None:
+        """Add any field to a contact by detecting it's type."""
+        if isinstance(field, Name):
+            self.name = field
+        elif isinstance(field, Birthday):
+            self.birthday = field
+        elif isinstance(field, Phone):
+            self.phones.append(field)
+        else:
+            raise TypeError("Unknown field type")
+
 class ContactsBook(UserDict):
     """Class representing a contacts book."""
     def add_record(self, record: Contact) -> None:
@@ -188,3 +199,7 @@ class ContactsBook(UserDict):
 
         return upcoming_birthdays
     
+class FieldInputWrapper():
+    def __init__(self, prompt: str, field_type: Type[Field]):
+        self.prompt = prompt
+        self.field_type = field_type

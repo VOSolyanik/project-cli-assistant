@@ -283,3 +283,7 @@ class ContactsHandler():
         self.book.delete(name)
         return Colorizer.success(f"Contact {name} deleted.")
     
+    def __handle_multiple_fields(fields: list[FieldInputWrapper]) -> None:
+        for filed_wrap in fields:
+            pass
+
