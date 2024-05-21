@@ -32,4 +32,4 @@ dev = ["black", "isort", "flake8", "pytest"]
 Homepage = "https://github.com/VOSolyanik/project-nestor"
 
 [project.scripts]
-contact-notes-buddy = "nestor.__main__:main"
+nestor = "nestor.__main__:main"

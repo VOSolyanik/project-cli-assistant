@@ -1,6 +1,7 @@
 from functools import wraps
-from services.colorizer import Colorizer
-from models.exceptions import ContactsBookException
+
+from nestor.services.colorizer import Colorizer
+from nestor.models.exceptions import ContactsBookException
 
 def input_error(errors_config: dict = {}):
     """
