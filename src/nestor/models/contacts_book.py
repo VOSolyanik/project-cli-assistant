@@ -2,7 +2,7 @@ from typing import Dict
 from collections import UserDict
 from datetime import datetime, timedelta
 
-from nestor.models.constants import NOT_SPECIFIED_FIELD_VALUE
+from models.constants import NOT_SPECIFIED_FIELD_VALUE
 from .exceptions import PhoneValueError, BirthdayValueError, EmailValueError
 import re
 
