@@ -5,6 +5,16 @@ from models.contacts_book import ContactsBook, Contact, Birthday
 from services.colorizer import Colorizer
 
 class ContactsHandler():
+    PHONE_COMMAND = "phone"
+    ADD_COMMAND = "add"
+    CHANGE_COMMAND = "change"
+    ADD_BIRTHDAY_COMMAND = "add-birthday"
+    ADD_EMAIL_COMMAND = "add-email"
+    EDIT_EMAIL_COMMAND = "email-email"
+    SHOW_BIRTHDAY_COMMAND = "show-birthday"
+    BIRTHDAYS_COMMAND = "birthdays"
+    ALL_COMMAND = "all"
+
     """
     Contacts handler class
     book: ContactsBook - contacts book instance
@@ -18,15 +28,15 @@ class ContactsHandler():
         Returns list of available commands
         """
         return [
-            "phone",
-            "add",
-            "change",
-            "add-birthday",
-            "add-email",
-            "edit-email",
-            "show-birthday",
-            "birthdays",
-            "all"
+            ContactsHandler.PHONE_COMMAND,
+            ContactsHandler.ADD_COMMAND,
+            ContactsHandler.CHANGE_COMMAND,
+            ContactsHandler.ADD_BIRTHDAY_COMMAND,
+            ContactsHandler.ADD_EMAIL_COMMAND,
+            ContactsHandler.EDIT_EMAIL_COMMAND,
+            ContactsHandler.SHOW_BIRTHDAY_COMMAND,
+            ContactsHandler.BIRTHDAYS_COMMAND,
+            ContactsHandler.ALL_COMMAND
         ]
 
     def handle(self, command: str, *args: list[str]) -> str:
@@ -36,21 +46,21 @@ class ContactsHandler():
         args: list[str] - command arguments
         """
         match command:
-            case "phone":
+            case ContactsHandler.PHONE_COMMAND:
                 return self.__get_phones(*args)
-            case "add":
+            case ContactsHandler.ADD_COMMAND:
                 return self.__add_contact(*args)
-            case "change":
+            case ContactsHandler.CHANGE_COMMAND:
                 return self.__change_contact(*args)
-            case "add-birthday":
+            case ContactsHandler.ADD_BIRTHDAY_COMMAND:
                 return self.__add_birthday(*args)
-            case "show-birthday":
+            case ContactsHandler.SHOW_BIRTHDAY_COMMAND:
                 return self.__show_birthday(*args)
-            case "birthdays":
+            case ContactsHandler.BIRTHDAYS_COMMAND:
                 return self._get_birthdays()
-            case "all":
+            case ContactsHandler.ALL_COMMAND:
                 return self.__get_all_contacts()
-            case "add-email" | "edit-email":
+            case ContactsHandler.ADD_EMAIL_COMMAND | ContactsHandler.EDIT_EMAIL_COMMAND:
                 return self.__edit_email(*args)
             case _:
                 return Colorizer.error("Invalid command.")
