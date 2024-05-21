@@ -101,9 +101,23 @@ class Contact:
                 return p
         return None
 
-    def edit_email(self, new_email: str) -> None:
-        """Edit or add email in record."""
+    def add_email(self, new_email: str) -> None:
+        """Add email to record if not exist."""
+        if self.email != None:
+            raise EmailValueError(f"Email already exist for {self.name}")
+
         self.email = Email(new_email)
+
+    def edit_email(self, new_email: str) -> None:
+        """Edit email in record."""
+        self.email = Email(new_email)
+
+    def remove_email(self) -> None:
+        """Remove email from record."""
+        if self.email == None:
+            raise EmailValueError(f"Contact {self.name} has no email set")
+        
+        self.email = None
     
     def add_birthday(self, birthday: str) -> None:
         """Add birthday to record if it's valid, otherwise handle ValueError."""
