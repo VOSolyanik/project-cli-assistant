@@ -54,7 +54,6 @@ class ContactsHandler():
             case "add-address":
                 parsed_args = self._parse_address_args(args)
                 return self.__add_address(*parsed_args)
-                return self.__add_address(*args)
             case "edit-address":
                 parsed_args = self._parse_address_args(args)
                 return self.__edit_address(*parsed_args)
