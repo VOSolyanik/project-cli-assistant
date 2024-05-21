@@ -1,6 +1,8 @@
 from typing import Dict
 from collections import UserDict
 from datetime import datetime, timedelta
+
+from nestor.models.constants import NOT_SPECIFIED_FIELD_VALUE
 from .exceptions import PhoneValueError, BirthdayValueError, EmailValueError
 import re
 
@@ -70,8 +72,6 @@ class Birthday(Field):
             raise BirthdayValueError("Invalid date format. Use DD.MM.YYYY") from exc
     
 class Contact:
-    NOT_SPECIFIED_FIELD_VALUE = 'not specified'
-
     """Contact class for storing contact information."""
     def __init__(self, name):
         self.name = Name(name)
@@ -80,7 +80,7 @@ class Contact:
         self.email = None
 
     def __str__(self):
-        return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}, birthday: {self.birthday or Contact.NOT_SPECIFIED_FIELD_VALUE}, email: {self.email or Contact.NOT_SPECIFIED_FIELD_VALUE}"
+        return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}, birthday: {self.birthday or NOT_SPECIFIED_FIELD_VALUE}, email: {self.email or NOT_SPECIFIED_FIELD_VALUE}"
     
     def add_phone(self, phone: str) -> None:
         """Add phone to record if it's valid, otherwise handle ValueError."""
