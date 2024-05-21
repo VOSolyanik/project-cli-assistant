@@ -45,7 +45,7 @@ class ContactsHandler():
             case "show-birthday":
                 return self.__show_birthday(*args)
             case "birthdays":
-                return self._get_birthdays()
+                return self.__get_upcoming_birthdays(*args)
             case "all":
                 return self.__get_all_contacts()
             case _:
@@ -135,12 +135,16 @@ class ContactsHandler():
         return Colorizer.success(str(record.birthday))
     
     @input_error()
-    def _get_birthdays(self) -> str:
+    def __get_upcoming_birthdays(self, *args) -> str:
         """
-        Returns all upcoming birthdays
+        Returns all upcoming birthdays within the given number of days
         """
-        birthdays: Dict[str, datetime] = self.book.get_upcoming_birthdays()
-
+        if not args[0].isdigit() or int(args[0]) < 0:
+            return Colorizer.error("Days must be a non-negative integer." # error to be done
+        
+        days = int(args[0])
+        birthdays = self.book.get_upcoming_birthdays(days)
+        
         if not birthdays:
             return Colorizer.warn("No upcoming birthdays found.")
         

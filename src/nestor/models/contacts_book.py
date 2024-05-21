@@ -104,8 +104,8 @@ class ContactsBook(UserDict):
             return self.data[name]
         return None
     
-    def get_upcoming_birthdays(self) -> Dict[str, datetime]:
-        """Return dict of contacts with upcoming birthdays."""
+    def get_upcoming_birthdays(self, days: int) -> dict:
+        """Return dict of contacts with upcoming birthdays within the given days."""
         today = datetime.today().date()
         upcoming_birthdays = {}
 
@@ -125,12 +125,11 @@ class ContactsBook(UserDict):
             # Calculate days to birthday
             days_to_birthday = (birthdate_this_year - today).days
 
-            # If days to birthday less than or equal to 7, calculate congratulation date
-            if days_to_birthday <= 7:
+            if days_to_birthday <= days:
                 congratulation_date = birthdate_this_year
                 # If congratulation date is weekend, calculate next week's date
                 if birthdate_this_year.weekday() >= 5:
-                    congratulation_date = birthdate_this_year + timedelta(days=7 - birthdate_this_year.weekday())
+                    congratulation_date += timedelta(days=(7 - congratulation_date.weekday()))
                 # Add user to upcoming birthdays dict
                 upcoming_birthdays[name] = congratulation_date
 
