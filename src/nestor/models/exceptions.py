@@ -1,5 +1,11 @@
-class PhoneValueError(Exception):
+class ContactsBookException(Exception):
     pass
 
-class BirthdayValueError(Exception):
+class PhoneValueError(ContactsBookException):
+    pass
+
+class BirthdayValueError(ContactsBookException):
+    pass
+
+class EmailValueError(ContactsBookException):
     pass

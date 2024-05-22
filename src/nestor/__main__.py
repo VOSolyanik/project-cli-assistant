@@ -1,40 +1,24 @@
-import pickle
 from typing import List, Tuple
 
-from handlers.contacts import ContactsHandler
-from handlers.notes import NotesHandler
-from services.colorizer import Colorizer
-from models.contacts_book import ContactsBook
-from models.notes_book import NotesBook
+from nestor.handlers.contacts import ContactsHandler
+from nestor.handlers.notes import NotesHandler
+from nestor.services.colorizer import Colorizer
+from nestor.services.serializer import Serializer
+from nestor.models.contacts_book import ContactsBook
+from nestor.models.notes_book import NotesBook
 
 def parse_input(user_input: str) -> Tuple[str, List[str]]:
     cmd, *args = user_input.split()
     cmd = cmd.strip().lower()
     return cmd, *args
 
-def load_data(filename="contacts_book.pkl"):
-    """
-    Loads data from file, returns empty contacts book if file not found
-    """
-    try:
-        with open(filename, "rb") as f:
-            return pickle.load(f)
-    except FileNotFoundError:
-        # Return empty contacts book if file not found
-        return ContactsBook()
-
-def save_data(book, filename="contacts_book.pkl"):
-    """
-    Saves data to file
-    """
-    with open(filename, "wb") as f:
-        pickle.dump(book, f)
 
 def main():
     # load ContactsBook and initialize contacts handler
-    contacts_book = load_data()
-    contacts_handler = ContactsHandler(contacts_book)
-    notes_handler = NotesHandler(NotesBook())
+    serializer = Serializer('data')
+    storage = serializer.load_data()
+    contacts_handler = ContactsHandler(storage.contacts_book)
+    notes_handler = NotesHandler(storage.notes_book)
 
     print(Colorizer.highlight("Welcome to the assistant bot!"))
     while True:
@@ -44,14 +28,14 @@ def main():
         # handle Exit on Ctrl+C
         except KeyboardInterrupt:
             print(Colorizer.highlight("\nGood bye!"))
-            save_data(contacts_book)
+            serializer.save_data(storage)
             break
 
         command, *args = parse_input(user_input)
 
         if command in ["close", "exit"]:
             print(Colorizer.highlight("Good bye!"))
-            save_data(contacts_book)
+            serializer.save_data(storage)
             break
         elif command == "hello":
             print(Colorizer.highlight("How can I help you?"))

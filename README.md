@@ -1,13 +1,13 @@
-# CLI Assistant
+# Nestor
 
-CLI assistant to manage contact and notes
+Nestor is a CLI assistant to manage contact and notes
 
-## DEV Setup
+## Setup
 
 - `python -m venv .venv` or `python3 -m venv .venv` to setup virtual environment
 - `source .venv/bin/activate` to activate virtual environment on Mac, Linux
-- `pip install -r requirements.txt` install packages
+- `pip install -e .` install packages
 
 ## Run
 
-- `python3 main.py` run script to start work with address book
+- `nestor` run script to start work with address book
