@@ -227,7 +227,7 @@ class ContactsHandler():
         
         return Colorizer.highlight("\n".join([str(record) for record in self.book.data.values()]))
     
-    @input_error({IndexError: "Contact name is required"})
+    @input_error()
     def __delete(self, *args) -> str:
         """
         Deletes a contact by name.
