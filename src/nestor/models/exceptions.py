@@ -9,6 +9,3 @@ class BirthdayValueError(ContactsBookException):
 
 class EmailValueError(ContactsBookException):
     pass
-
-class DaysValueError(ContactsBookException):
-    pass

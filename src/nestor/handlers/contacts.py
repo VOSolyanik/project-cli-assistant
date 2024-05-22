@@ -4,7 +4,6 @@ from datetime import datetime
 from nestor.utils.input_error import input_error
 from nestor.models.contacts_book import ContactsBook, Contact, Birthday
 from nestor.services.colorizer import Colorizer
-from nestor.models.exceptions import DaysValueError
 
 class ContactsHandler():
     PHONE_COMMAND = "phone"
@@ -203,13 +202,11 @@ class ContactsHandler():
         
         return Colorizer.success(str(record.birthday))
     
-    @input_error()
+    @input_error({ValueError: "Days must be a non-negative integer.", IndexError: "Number of days is required"})
     def __get_upcoming_birthdays(self, *args) -> str:
         """
         Returns all upcoming birthdays within the given number of days
         """
-        if not args[0].isdigit() or int(args[0]) < 0:
-            raise DaysValueError("Days must be a non-negative integer.")
         
         days = int(args[0])
         birthdays = self.book.get_upcoming_birthdays(days)
