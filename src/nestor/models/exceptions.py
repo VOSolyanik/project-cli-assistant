@@ -3,3 +3,6 @@ class PhoneValueError(Exception):
 
 class BirthdayValueError(Exception):
     pass
+
+class AddressValueError(Exception):
+    pass

@@ -1,6 +1,6 @@
 from functools import wraps
 from services.colorizer import Colorizer
-from models.exceptions import PhoneValueError, BirthdayValueError
+from models.exceptions import PhoneValueError, BirthdayValueError, AddressValueError
 
 def input_error(errors_config: dict = {}):
     """
@@ -23,6 +23,8 @@ def input_error(errors_config: dict = {}):
             except PhoneValueError as e:
                 return Colorizer.error(e)
             except BirthdayValueError as e:
+                return Colorizer.error(e)
+            except AddressValueError as e:
                 return Colorizer.error(e)
             except ValueError as e:
                 return Colorizer.error(errors[ValueError])

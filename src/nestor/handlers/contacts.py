@@ -1,9 +1,9 @@
 from typing import Dict
 from datetime import datetime
 from utils.input_error import input_error
+from models.exceptions import AddressValueError
 from models.contacts_book import ContactsBook, Contact, Birthday
 from services.colorizer import Colorizer
-import shlex
 
 class ContactsHandler():
     """
@@ -52,21 +52,11 @@ class ContactsHandler():
             case "all":
                 return self.__get_all_contacts()
             case "add-address":
-                parsed_args = self._parse_address_args(args)
-                return self.__add_address(*parsed_args)
+                return self.__add_address(*args)
             case "edit-address":
-                parsed_args = self._parse_address_args(args)
-                return self.__edit_address(*parsed_args)
+                return self.__edit_address(*args)
             case _:
                 return Colorizer.error("Invalid command.")
-            
-    @staticmethod
-    def _parse_address_args(args: list[str]) -> list[str]:
-        args_str = " ".join(args)
-        lexer = shlex.shlex(args_str, posix=True)
-        lexer.whitespace_split = True
-        lexer.quotes = '"'
-        return list(lexer)
     
     @input_error()
     def __get_phones(self, *args) -> str:
@@ -179,7 +169,7 @@ class ContactsHandler():
         args: list[str] - command arguments
         """
         if len(args) != 6:
-            raise AddressValueError("Invalid number of arguments for add-address.")
+            raise AddressValueError("All address fields must be provided.")
         name, street, city, state, zip_code, country = args
         contact = self.book.find(name)
         if contact is None:
@@ -194,7 +184,7 @@ class ContactsHandler():
         args: list[str] - command arguments
         """
         if len(args) != 6:
-            raise AddressValueError("Invalid number of arguments for edit-address.")
+            raise AddressValueError("All address fields must be provided.")
         name, street, city, state, zip_code, country = args
         contact = self.book.find(name)
         if contact is None:
