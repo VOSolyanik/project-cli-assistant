@@ -9,6 +9,7 @@ from nestor.models.exceptions import AddressValueError
 class ContactsHandler():
     PHONE_COMMAND = "phone"
     ADD_COMMAND = "add"
+    DELETE_COMMAND = "delete"
     CHANGE_COMMAND = "change"
     ADD_BIRTHDAY_COMMAND = "add-birthday"
     ADD_EMAIL_COMMAND = "add-email"
@@ -36,6 +37,7 @@ class ContactsHandler():
         return [
             ContactsHandler.PHONE_COMMAND,
             ContactsHandler.ADD_COMMAND,
+            ContactsHandler.DELETE_COMMAND,
             ContactsHandler.CHANGE_COMMAND,
             ContactsHandler.ADD_BIRTHDAY_COMMAND,
             ContactsHandler.ADD_EMAIL_COMMAND,
@@ -60,6 +62,8 @@ class ContactsHandler():
                 return self.__get_phones(*args)
             case ContactsHandler.ADD_COMMAND:
                 return self.__add_contact(*args)
+            case ContactsHandler.DELETE_COMMAND:
+                return self.__delete(*args) 
             case ContactsHandler.CHANGE_COMMAND:
                 return self.__change_contact(*args)
             case ContactsHandler.ADD_BIRTHDAY_COMMAND:
@@ -263,3 +267,19 @@ class ContactsHandler():
             return Colorizer.error(f"Contact not found")
         contact.edit_address(street, city, state, zip_code, country)
         return Colorizer.success(f"Contact {name} address updated successfully.")
+    
+    @input_error()
+    def __delete(self, *args) -> str:
+        """
+        Deletes a contact by name.
+        args: list[str] - command arguments
+        """
+        
+        name = args[0]
+        record = self.book.find(name)
+        if record is None:
+            return Colorizer.warn("Contact not found")
+        
+        self.book.delete(name)
+        return Colorizer.success(f"Contact {name} deleted.")
+    
