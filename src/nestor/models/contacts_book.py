@@ -161,3 +161,4 @@ class ContactsBook(UserDict):
                 upcoming_birthdays[name] = congratulation_date
 
         return upcoming_birthdays
+    
