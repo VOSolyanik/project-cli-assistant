@@ -322,17 +322,17 @@ class ContactsHandler():
     def __handle_multiple_fields(self, fields: list[FieldInputWrapper]) -> list[Field]:
         result = []
 
-        for filed_wrap in fields:
+        for field_wrap in fields:
             repeat = True
 
             while repeat:
-                user_input = input(filed_wrap.prompt)
+                user_input = input(field_wrap.prompt)
 
                 try:
-                    if len(user_input) == 0 and not filed_wrap.is_required:
+                    if len(user_input) == 0 and not field_wrap.is_required:
                         repeat = False
                     else:
-                        field = filed_wrap.field_type(user_input)
+                        field = field_wrap.field_type(user_input)
                         result.append(field)
                         repeat = False
                 except ContactsBookException as e:
