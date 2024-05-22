@@ -114,7 +114,7 @@ class Contact:
             elif isinstance(field, Phone):
                 contact.phones.append(field)
             elif isinstance(field, Email):
-                contact.email = Email
+                contact.email = field
         
         if contact.name.value == 'UNSET':
             raise NameValueError("Name is mandatory for a contact")
