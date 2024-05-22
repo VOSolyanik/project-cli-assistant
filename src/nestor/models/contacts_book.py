@@ -70,6 +70,17 @@ class Birthday(Field):
             self._value = date.date()
         except ValueError as exc:
             raise BirthdayValueError("Invalid date format. Use DD.MM.YYYY") from exc
+        
+class Address:
+    def __init__(self, street, city, state, zip_code, country):
+        self.street = street
+        self.city = city
+        self.state = state
+        self.zip_code = zip_code
+        self.country = country
+
+    def __str__(self):
+        return f"{self.street}, {self.city}, {self.state}, {self.zip_code}, {self.country}"
     
 class Contact:
     """Contact class for storing contact information."""
@@ -78,9 +89,10 @@ class Contact:
         self.phones = []
         self.birthday = None
         self.email = None
+        self.address = None
 
     def __str__(self):
-        return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}, birthday: {self.birthday or NOT_SPECIFIED_FIELD_VALUE}, email: {self.email or NOT_SPECIFIED_FIELD_VALUE}"
+        return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}, birthday: {self.birthday or NOT_SPECIFIED_FIELD_VALUE}, email: {self.email or NOT_SPECIFIED_FIELD_VALUE}, address: {self.address or NOT_SPECIFIED_FIELD_VALUE}"
     
     def add_phone(self, phone: str) -> None:
         """Add phone to record if it's valid, otherwise handle ValueError."""
@@ -113,6 +125,21 @@ class Contact:
     def add_birthday(self, birthday: str) -> None:
         """Add birthday to record if it's valid, otherwise handle ValueError."""
         self.birthday = Birthday(birthday)
+
+    def add_address(self, street: str, city: str, state: str, zip_code: str, country: str):
+        """Add address"""
+        self.address = Address(street, city, state, zip_code, country)
+
+    def edit_address(self, street: str = None, city: str = None, state: str = None, zip_code: str = None, country: str = None):
+        """Edit address"""
+        if not self.address:
+            self.address = Address(street, city, state, zip_code, country)
+        else:
+            self.address.street = street if street else self.address.street
+            self.address.city = city if city else self.address.city
+            self.address.state = state if state else self.address.state
+            self.address.zip_code = zip_code if zip_code else self.address.zip_code
+            self.address.country = country if country else self.address.country
 
 class ContactsBook(UserDict):
     """Class representing a contacts book."""
