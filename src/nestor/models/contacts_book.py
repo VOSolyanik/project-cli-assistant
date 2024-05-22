@@ -178,7 +178,7 @@ class Contact:
 
 class ContactsBook(UserDict):
     """Class representing a contacts book."""
-    def add_record(self, record: Contact) -> None:
+    def add(self, record: Contact) -> None:
         """Add record to address book."""
         self.data[record.name.value] = record
     
@@ -191,6 +191,17 @@ class ContactsBook(UserDict):
         if name in self.data:
             return self.data[name]
         return None
+    
+    def search(self, search_str: str) -> list[Contact]:
+        """Search records in address book by name, email and address."""
+
+        result = []
+        for record in self.data.values():
+            if search_str.lower() in str(record.name).lower() or \
+                (record.email and search_str.lower() in record.email.value.lower()) or \
+                    (record.address and search_str.lower() in str(record.address).lower()):
+                result.append(record)
+        return result
     
     def get_upcoming_birthdays(self, days: int) -> dict:
         """Return dict of contacts with upcoming birthdays within the given days."""
