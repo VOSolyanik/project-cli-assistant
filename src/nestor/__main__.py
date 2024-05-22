@@ -1,3 +1,4 @@
+import shlex
 from typing import List, Tuple
 
 from nestor.handlers.contacts import ContactsHandler
@@ -8,8 +9,9 @@ from nestor.models.contacts_book import ContactsBook
 from nestor.models.notes_book import NotesBook
 
 def parse_input(user_input: str) -> Tuple[str, List[str]]:
-    cmd, *args = user_input.split()
-    cmd = cmd.strip().lower()
+    parts = shlex.split(user_input)
+    cmd = parts[0].strip().lower()
+    args = parts[1:]
     return cmd, *args
 
 
