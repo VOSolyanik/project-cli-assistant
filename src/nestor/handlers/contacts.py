@@ -4,6 +4,7 @@ from datetime import datetime
 from nestor.utils.input_error import input_error
 from nestor.models.contacts_book import ContactsBook, Contact, Birthday
 from nestor.services.colorizer import Colorizer
+from nestor.models.exceptions import AddressValueError
 
 class ContactsHandler():
     PHONE_COMMAND = "phone"
@@ -17,6 +18,8 @@ class ContactsHandler():
     SHOW_BIRTHDAY_COMMAND = "show-birthday"
     BIRTHDAYS_COMMAND = "birthdays"
     ALL_COMMAND = "all"
+    ADD_ADDRESS = "add-address"
+    EDIT_ADDRESS = "edit-address"
 
     """
     Contacts handler class
@@ -41,7 +44,9 @@ class ContactsHandler():
             ContactsHandler.DELETE_EMAIL_COMMAND,
             ContactsHandler.SHOW_BIRTHDAY_COMMAND,
             ContactsHandler.BIRTHDAYS_COMMAND,
-            ContactsHandler.ALL_COMMAND
+            ContactsHandler.ALL_COMMAND,
+            ContactsHandler.ADD_ADDRESS,
+            ContactsHandler.EDIT_ADDRESS
         ]
 
     def handle(self, command: str, *args: list[str]) -> str:
@@ -71,6 +76,10 @@ class ContactsHandler():
                 return self.__show_email(*args)
             case ContactsHandler.DELETE_EMAIL_COMMAND:
                 return self.__delete_email(*args)
+            case ContactsHandler.ADD_ADDRESS:
+                return self.__add_address(*args)
+            case ContactsHandler.EDIT_ADDRESS:
+                return self.__edit_address(*args)
             case _:
                 return Colorizer.error("Invalid command.")
     
@@ -225,3 +234,32 @@ class ContactsHandler():
         
         return Colorizer.highlight("\n".join([str(record) for record in self.book.data.values()]))
     
+    @input_error()
+    def __add_address(self, *args) -> str:
+        """
+        Adds address to contact
+        args: list[str] - command arguments
+        """
+        if len(args) != 6:
+            raise AddressValueError("All address fields must be provided.")
+        name, street, city, state, zip_code, country = args
+        contact = self.book.find(name)
+        if contact is None:
+            return Colorizer.error(f"Contact not found")
+        contact.add_address(street, city, state, zip_code, country)
+        return Colorizer.success(f"Contact {name} address added.")
+
+    @input_error()
+    def __edit_address(self, *args) -> str:
+        """
+        Edits address of contact
+        args: list[str] - command arguments
+        """
+        if len(args) != 6:
+            raise AddressValueError("All address fields must be provided.")
+        name, street, city, state, zip_code, country = args
+        contact = self.book.find(name)
+        if contact is None:
+            return Colorizer.error(f"Contact not found")
+        contact.edit_address(street, city, state, zip_code, country)
+        return Colorizer.success(f"Contact {name} address updated successfully.")
