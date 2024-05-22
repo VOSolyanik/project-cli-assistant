@@ -1,10 +1,4 @@
-from typing import Dict
-from datetime import datetime
-from collections import namedtuple
-
 from nestor.handlers.command_data_collector import FieldInput, command_data_collector
-from nestor.models.exceptions import ContactsBookException
-from nestor.services.ui import UserInterface
 from nestor.utils.input_error import input_error
 from nestor.models.contacts_book import ContactsBook, Contact, Birthday, Email, Field, Name, Phone
 from nestor.services.colorizer import Colorizer
@@ -289,8 +283,10 @@ class ContactsHandler():
             raise AddressValueError("All address fields must be provided.")
         name, street, city, state, zip_code, country = args
         contact = self.book.find(name)
+
         if contact is None:
-            return Colorizer.error(f"Contact not found")
+            return Colorizer.error("Contact not found")
+        
         contact.add_address(street, city, state, zip_code, country)
         return Colorizer.success(f"Contact {name} address added.")
 
@@ -304,8 +300,10 @@ class ContactsHandler():
             raise AddressValueError("All address fields must be provided.")
         name, street, city, state, zip_code, country = args
         contact = self.book.find(name)
+
         if contact is None:
-            return Colorizer.error(f"Contact not found")
+            return Colorizer.error("Contact not found")
+        
         contact.edit_address(street, city, state, zip_code, country)
         return Colorizer.success(f"Contact {name} address updated successfully.")
     

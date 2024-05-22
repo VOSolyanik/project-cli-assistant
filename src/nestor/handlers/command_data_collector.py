@@ -32,11 +32,11 @@ def contact_input(fields: list[FieldInput]):
                 except Exception as e:
                     yield e
                     continue
-            result.append(value.strip() if value else "")
+            result.append(value.strip() if value else None)
             break
     yield result
 
-def command_data_collector(fields: list[FieldInput]) -> list[str]:
+def command_data_collector(fields: list[FieldInput]) -> list[str | None]:
     """
     Collects user input for the given fields.
 
