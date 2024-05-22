@@ -28,7 +28,6 @@ class Name(Field):
                                  
     @property
     def value(self):
-        print(self)
         return self._value
     
     @value.setter

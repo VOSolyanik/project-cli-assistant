@@ -22,7 +22,6 @@ def contact_input(fields: list[FieldInput]):
     for field in fields:
         while True:
             value = yield f"{field.prompt}: "
-            print("Debugging value: ", value)
             if not value and field.is_required:
                 yield FieldRequiredError(f"{field.prompt} is required")
                 continue
