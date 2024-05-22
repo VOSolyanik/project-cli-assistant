@@ -9,6 +9,7 @@ from nestor.models.exceptions import PhoneValueError, BirthdayValueError, EmailV
 class Field:
     """Base class for fields."""
     def __init__(self, value: str):
+        self._value = None
         self.value = value
     
     def __str__(self):
@@ -19,7 +20,16 @@ class Field:
     
 class Name(Field):
     """Class representing a name field."""
-    pass
+    @property
+    def value(self):
+        return self._value
+    
+    @value.setter
+    def value(self, value: str):
+        if value is None or len(value) == 0:
+            raise NameValueError("Name is mandatory")
+        
+        self._value = value
 
 class Phone(Field):
     """Class representing a phone field."""
@@ -43,7 +53,7 @@ class Email(Field):
     """Class representing a email field."""
     @property
     def value(self):
-        return self._value 
+        return self._value
     
     @value.setter
     def value(self, value: str):
@@ -90,6 +100,26 @@ class Contact:
         self.birthday = None
         self.email = None
         self.address = None
+
+    @classmethod
+    def from_fields(cls, fields: list[Field]):
+        """Creates a contact from the list of fields."""
+        contact = cls('UNSET')
+
+        for field in fields:
+            if isinstance(field, Name):
+                contact.name = field
+            elif isinstance(field, Birthday):
+                contact.birthday = field
+            elif isinstance(field, Phone):
+                contact.phones.append(field)
+            elif isinstance(field, Email):
+                contact.email = Email
+        
+        if contact.name.value == 'UNSET':
+            raise NameValueError("Name is mandatory for a contact")
+        
+        return contact
 
     def __str__(self):
         return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}, birthday: {self.birthday or NOT_SPECIFIED_FIELD_VALUE}, email: {self.email or NOT_SPECIFIED_FIELD_VALUE}, address: {self.address or NOT_SPECIFIED_FIELD_VALUE}"
@@ -151,6 +181,7 @@ class Contact:
             self.phones.append(field)
         else:
             raise TypeError("Unknown field type")
+    
 
 class ContactsBook(UserDict):
     """Class representing a contacts book."""
@@ -200,6 +231,7 @@ class ContactsBook(UserDict):
         return upcoming_birthdays
     
 class FieldInputWrapper():
-    def __init__(self, prompt: str, field_type: Type[Field]):
+    def __init__(self, prompt: str, field_type: Type[Field], is_required: bool):
         self.prompt = prompt
         self.field_type = field_type
+        self.is_required = is_required

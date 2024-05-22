@@ -45,7 +45,7 @@ def main():
             #todo: Implement
             pass
         elif command in ContactsHandler.get_available_commands():
-            print(contacts_handler.handle(command, *args))
+            contacts_handler.handle(command, *args)
         elif command in NotesHandler.get_available_commands():
             print(notes_handler.handle(command, *args))
         else:

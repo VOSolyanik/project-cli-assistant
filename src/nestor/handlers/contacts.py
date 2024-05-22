@@ -10,6 +10,7 @@ class ContactsHandler():
     PHONE_COMMAND = "phone"
     ADD_COMMAND = "add"
     DELETE_COMMAND = "delete"
+    ADD_CONTACT_COMMAND = "add-contact"
     CHANGE_COMMAND = "change"
     ADD_BIRTHDAY_COMMAND = "add-birthday"
     ADD_EMAIL_COMMAND = "add-email"
@@ -38,6 +39,7 @@ class ContactsHandler():
             ContactsHandler.PHONE_COMMAND,
             ContactsHandler.ADD_COMMAND,
             ContactsHandler.DELETE_COMMAND,
+            ContactsHandler.ADD_CONTACT_COMMAND,
             ContactsHandler.CHANGE_COMMAND,
             ContactsHandler.ADD_BIRTHDAY_COMMAND,
             ContactsHandler.ADD_EMAIL_COMMAND,
@@ -64,6 +66,8 @@ class ContactsHandler():
                 return self.__add_contact(*args)
             case ContactsHandler.DELETE_COMMAND:
                 return self.__delete(*args) 
+            case ContactsHandler.ADD_CONTACT_COMMAND:
+                return self.__add_contact_with_all_fields()
             case ContactsHandler.CHANGE_COMMAND:
                 return self.__change_contact(*args)
             case ContactsHandler.ADD_BIRTHDAY_COMMAND:
@@ -96,9 +100,9 @@ class ContactsHandler():
         name = args[0]
         record = self.book.find(name)
         if record is None:
-            return Colorizer.warn("Contact not found")
+            print(Colorizer.warn("Contact not found"))
         
-        return Colorizer.highlight("; ".join([str(item) for item in record.phones]))
+        print(Colorizer.highlight("; ".join([str(item) for item in record.phones])))
     
     @input_error()
     def __add_contact(self, *args) -> str:
@@ -118,7 +122,39 @@ class ContactsHandler():
         else:
             record.add_phone(phone)
 
-        return message
+        print(message)
+
+    @input_error()
+    def __add_contact_with_all_fields(self) -> str:
+        """
+        Adds contact to contacts dictionary
+        args: list[str] - command arguments
+        """
+
+        input_fields = [
+            FieldInputWrapper("Name: ", Name, True),
+            FieldInputWrapper("Phone number: ", Phone, False),
+            FieldInputWrapper("Date of Birth: ", Birthday, False),
+            FieldInputWrapper("Email: ", Email, False),
+        ]
+
+        fields = self.__handle_multiple_fields(input_fields)
+
+        new_record = Contact.from_fields(fields)
+
+        name = new_record.name.value
+
+        existing_record = self.book.find(name)
+        message = Colorizer.success(f"Contact {name} updated.")
+
+        if existing_record is None:
+            self.book.add_record(new_record)
+            message = Colorizer.success(f"Contact {name} added.")
+        else:
+            #TODO: edit contact with a list of fields
+            pass
+
+        print(message)
 
     @input_error({IndexError: "New phone is required"})
     def __change_contact(self, *args) -> str:
@@ -139,7 +175,7 @@ class ContactsHandler():
             new_phone = args[2]
             phone.value = new_phone
 
-        return message
+        print(message)
     
     @input_error({ValueError: "Contact name and email are required"})
     def __edit_email(self, *args) -> str:
@@ -152,10 +188,10 @@ class ContactsHandler():
         message = Colorizer.success(f"Contact {name} email updated.")
 
         if record is None:
-            return Colorizer.warn("Contact not found")
+            print(Colorizer.warn("Contact not found"))
         
         record.edit_email(email)
-        return message
+        print(message)
     
     @input_error()
     def __show_email(self, *args) -> str:
@@ -166,9 +202,9 @@ class ContactsHandler():
         name = args[0]
         record = self.book.find(name)
         if record is None:
-            return Colorizer.warn("Contact not found")
+            print(Colorizer.warn("Contact not found"))
         
-        return Colorizer.success(str(record.email))
+        print(Colorizer.success(str(record.email)))
     
     @input_error()
     def __delete_email(self, *args) -> str:
@@ -181,10 +217,10 @@ class ContactsHandler():
         message = Colorizer.success(f"Contact {name} email removed.")
 
         if record is None:
-            return Colorizer.warn("Contact not found")
+            print(Colorizer.warn("Contact not found"))
         
         record.remove_email()
-        return message
+        print(message)
 
     @input_error({ValueError: "Contact name and birthday are required"})
     def __add_birthday(self, *args) -> str:
@@ -197,10 +233,10 @@ class ContactsHandler():
         message = Colorizer.success(f"Contact {name} birthday added.")
 
         if record is None:
-            return Colorizer.warn("Contact not found")
+            print(Colorizer.warn("Contact not found"))
         
         record.add_birthday(birthday)
-        return message
+        print(message)
     
     @input_error()
     def __show_birthday(self, *args) -> str:
@@ -211,9 +247,9 @@ class ContactsHandler():
         name = args[0]
         record = self.book.find(name)
         if record is None:
-            return Colorizer.warn("Contact not found")
+            print(Colorizer.warn("Contact not found"))
         
-        return Colorizer.success(str(record.birthday))
+        print(Colorizer.success(str(record.birthday)))
     
     @input_error({ValueError: "Days must be a non-negative integer.", IndexError: "Number of days is required"})
     def __get_upcoming_birthdays(self, *args) -> str:
@@ -225,18 +261,18 @@ class ContactsHandler():
         birthdays = self.book.get_upcoming_birthdays(days)
         
         if not birthdays:
-            return Colorizer.warn("No upcoming birthdays found.")
+            print(Colorizer.warn("No upcoming birthdays found."))
         
-        return Colorizer.highlight("\n".join([f"Contact name: {name}, congratulate at: {date.strftime(Birthday.format)}" for name, date in birthdays.items()]))
+        print(Colorizer.highlight("\n".join([f"Contact name: {name}, congratulate at: {date.strftime(Birthday.format)}" for name, date in birthdays.items()])))
     
     def __get_all_contacts(self) -> str:
         """
         Returns all contacts
         """
         if not self.book.data:
-            return Colorizer.warn("No contacts found")
+            print(Colorizer.warn("No contacts found"))
         
-        return Colorizer.highlight("\n".join([str(record) for record in self.book.data.values()]))
+        print(Colorizer.highlight("\n".join([str(record) for record in self.book.data.values()])))
     
     @input_error()
     def __add_address(self, *args) -> str:
@@ -282,8 +318,33 @@ class ContactsHandler():
         
         self.book.delete(name)
         return Colorizer.success(f"Contact {name} deleted.")
-    
-    def __handle_multiple_fields(fields: list[FieldInputWrapper]) -> None:
+
+    def __handle_multiple_fields(self, fields: list[FieldInputWrapper]) -> list[Field]:
+        result = []
+
         for filed_wrap in fields:
-            pass
+            repeat = True
+
+            while repeat:
+                user_input = input(filed_wrap.prompt)
+
+                try:
+                    if len(user_input) == 0 and not filed_wrap.is_required:
+                        repeat = False
+                    else:
+                        print(f'Creating field with {filed_wrap.field_type} type')
+                        field = filed_wrap.field_type(user_input)
+                        print(field)
+                        result.append(field)
+                        repeat = False
+                except ContactsBookException as e:
+                    print(Colorizer.error(e))
+                    repeat = True
+
+        return result
+
+            
+                
+        
+
 

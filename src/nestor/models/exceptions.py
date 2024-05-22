@@ -1,6 +1,9 @@
 class ContactsBookException(Exception):
     pass
 
+class NameValueError(ContactsBookException):
+    pass
+
 class PhoneValueError(ContactsBookException):
     pass
 
