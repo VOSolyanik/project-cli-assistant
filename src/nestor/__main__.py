@@ -21,10 +21,11 @@ def main():
     serializer = Serializer('data')
     ui = CommandLineInterface()
     storage = serializer.load_data()
-    contacts_handler = ContactsHandler(storage.contacts_book, ui)
+    contacts_handler = ContactsHandler(storage.contacts_book)
     notes_handler = NotesHandler(storage.notes_book)
 
     ui.output(Colorizer.highlight("Welcome to the assistant bot!"))
+
     while True:
         user_input = ""
         try:
@@ -47,7 +48,7 @@ def main():
             #todo: Implement
             pass
         elif command in ContactsHandler.get_available_commands():
-            contacts_handler.handle(command, *args)
+            ui.output(contacts_handler.handle(command, *args))
         elif command in NotesHandler.get_available_commands():
             ui.output(notes_handler.handle(command, *args))
         else:
