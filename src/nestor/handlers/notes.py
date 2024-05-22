@@ -1,4 +1,4 @@
-from models.notes_book import NotesBook
+from nestor.models.notes_book import NotesBook
 
 class NotesHandler():
     """

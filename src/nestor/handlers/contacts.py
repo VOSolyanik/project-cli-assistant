@@ -1,8 +1,9 @@
 from typing import Dict
 from datetime import datetime
-from utils.input_error import input_error
-from models.contacts_book import ContactsBook, Contact, Birthday
-from services.colorizer import Colorizer
+
+from nestor.utils.input_error import input_error
+from nestor.models.contacts_book import ContactsBook, Contact, Birthday
+from nestor.services.colorizer import Colorizer
 
 class ContactsHandler():
     PHONE_COMMAND = "phone"

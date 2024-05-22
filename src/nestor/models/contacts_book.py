@@ -1,10 +1,10 @@
+import re
 from typing import Dict
 from collections import UserDict
 from datetime import datetime, timedelta
 
-from models.constants import NOT_SPECIFIED_FIELD_VALUE
-from .exceptions import PhoneValueError, BirthdayValueError, EmailValueError
-import re
+from nestor.models.constants import NOT_SPECIFIED_FIELD_VALUE
+from nestor.models.exceptions import PhoneValueError, BirthdayValueError, EmailValueError
 
 class Field:
     """Base class for fields."""
