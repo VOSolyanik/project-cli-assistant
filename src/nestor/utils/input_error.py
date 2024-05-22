@@ -3,7 +3,7 @@ from nestor.services.colorizer import Colorizer
 from nestor.models.exceptions import ContactsBookException
 
 def input_error(errors_config: dict = {}):
-    """я
+    """
     Decorator that handles input errors and provides error messages.
     """
     errors = {
