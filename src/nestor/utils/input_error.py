@@ -20,13 +20,13 @@ def input_error(errors_config: dict = {}):
             try:
                 return func(*args, **kwargs)
             except KeyError as e:
-                return Colorizer.error(f"Contact {e} not found")
+                print(Colorizer.error(f"Contact {e} not found"))
             except ContactsBookException as e:
-                return Colorizer.error(e)
+                print(Colorizer.error(e))
             except ValueError as e:
-                return Colorizer.error(errors[ValueError])
+                print(Colorizer.error(errors[ValueError]))
             except IndexError as e:
-                return Colorizer.error(errors[IndexError])
+                print(Colorizer.error(errors[IndexError]))
         return inner
     return wrapper
 

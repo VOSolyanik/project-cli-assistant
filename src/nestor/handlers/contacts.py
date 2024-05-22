@@ -1,8 +1,9 @@
 from typing import Dict
 from datetime import datetime
 
+from nestor.models.exceptions import ContactsBookException
 from nestor.utils.input_error import input_error
-from nestor.models.contacts_book import ContactsBook, Contact, Birthday
+from nestor.models.contacts_book import ContactsBook, Contact, Birthday, Email, Field, FieldInputWrapper, Name, Phone
 from nestor.services.colorizer import Colorizer
 from nestor.models.exceptions import AddressValueError
 
@@ -128,7 +129,6 @@ class ContactsHandler():
     def __add_contact_with_all_fields(self) -> str:
         """
         Adds contact to contacts dictionary
-        args: list[str] - command arguments
         """
 
         input_fields = [
@@ -332,9 +332,7 @@ class ContactsHandler():
                     if len(user_input) == 0 and not filed_wrap.is_required:
                         repeat = False
                     else:
-                        print(f'Creating field with {filed_wrap.field_type} type')
                         field = filed_wrap.field_type(user_input)
-                        print(field)
                         result.append(field)
                         repeat = False
                 except ContactsBookException as e:
