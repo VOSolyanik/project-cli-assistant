@@ -4,6 +4,7 @@ from datetime import datetime
 from nestor.utils.input_error import input_error
 from nestor.models.contacts_book import ContactsBook, Contact, Birthday
 from nestor.services.colorizer import Colorizer
+from nestor.models.exceptions import AddressValueError
 
 class ContactsHandler():
     PHONE_COMMAND = "phone"
@@ -18,7 +19,7 @@ class ContactsHandler():
     BIRTHDAYS_COMMAND = "birthdays"
     ALL_COMMAND = "all"
     ADD_ADDRESS = "add-address"
-    EDIT_ADDRESS = "edit-address
+    EDIT_ADDRESS = "edit-address"
 
     """
     Contacts handler class
@@ -75,9 +76,9 @@ class ContactsHandler():
                 return self.__show_email(*args)
             case ContactsHandler.DELETE_EMAIL_COMMAND:
                 return self.__delete_email(*args)
-            ContactsHandler.ADD_ADDRESS:
+            case ContactsHandler.ADD_ADDRESS:
                 return self.__add_address(*args)
-            ContactsHandler.EDIT_ADDRESS:
+            case ContactsHandler.EDIT_ADDRESS:
                 return self.__edit_address(*args)
             case _:
                 return Colorizer.error("Invalid command.")
