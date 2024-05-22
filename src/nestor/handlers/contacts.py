@@ -67,7 +67,7 @@ class ContactsHandler():
             case ContactsHandler.SHOW_BIRTHDAY_COMMAND:
                 return self.__show_birthday(*args)
             case ContactsHandler.BIRTHDAYS_COMMAND:
-                return self._get_birthdays()
+                return self.__get_upcoming_birthdays(*args)
             case ContactsHandler.ALL_COMMAND:
                 return self.__get_all_contacts()
             case ContactsHandler.EDIT_EMAIL_COMMAND | ContactsHandler.ADD_EMAIL_COMMAND:
@@ -211,13 +211,15 @@ class ContactsHandler():
         
         return Colorizer.success(str(record.birthday))
     
-    @input_error()
-    def _get_birthdays(self) -> str:
+    @input_error({ValueError: "Days must be a non-negative integer.", IndexError: "Number of days is required"})
+    def __get_upcoming_birthdays(self, *args) -> str:
         """
-        Returns all upcoming birthdays
+        Returns all upcoming birthdays within the given number of days
         """
-        birthdays: Dict[str, datetime] = self.book.get_upcoming_birthdays()
-
+        
+        days = int(args[0])
+        birthdays = self.book.get_upcoming_birthdays(days)
+        
         if not birthdays:
             return Colorizer.warn("No upcoming birthdays found.")
         
