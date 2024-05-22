@@ -1,4 +1,5 @@
 from functools import wraps
+
 from nestor.services.colorizer import Colorizer
 from nestor.models.exceptions import ContactsBookException
 
