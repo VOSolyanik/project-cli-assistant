@@ -1,54 +1,78 @@
 import re
-from typing import Dict
+from typing import Dict, Type
 from collections import UserDict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 from nestor.models.constants import NOT_SPECIFIED_FIELD_VALUE
-from nestor.models.exceptions import PhoneValueError, BirthdayValueError, EmailValueError
+from nestor.models.exceptions import NameValueError, PhoneValueError, BirthdayValueError, EmailValueError
 
 class Field:
     """Base class for fields."""
     def __init__(self, value: str):
+        self._value = None
         self.value = value
     
     def __str__(self):
-        return str(self.value)
+        return str(self._value)
     
     def __repr__(self):
         return str(self)
     
 class Name(Field):
     """Class representing a name field."""
-    pass
 
-class Phone(Field):
-    """Class representing a phone field."""
+    @staticmethod
+    def validate(value: str) -> None:
+        if value is None or len(value) == 0:
+            raise NameValueError("Name is required")
+                                 
     @property
     def value(self):
-        return self._value 
+        return self._value
     
     @value.setter
     def value(self, value: str):
+        Name.validate(value)
+        
+        self._value = value
+
+class Phone(Field):
+    """Class representing a phone field."""
+
+    @staticmethod
+    def validate(value: str) -> None:
         if not value.isdigit():
             raise PhoneValueError("Phone number must contain only digits")
         
         if len(value) != 10:
             raise PhoneValueError("Phone number must contain 10 digits")
         
-        self._value = value
-
-class Email(Field):
-    format_regexp = r'^\S+@\S+\.\S+$'
-
-    """Class representing a email field."""
     @property
     def value(self):
         return self._value 
     
     @value.setter
     def value(self, value: str):
+        Phone.validate(value)
+        
+        self._value = value
+
+class Email(Field):
+    """Class representing a email field."""
+    format_regexp = r'^\S+@\S+\.\S+$'
+
+    @staticmethod
+    def validate(value: str) -> None:
         if re.match(Email.format_regexp, value) is None:
             raise EmailValueError("Wrong email format")
+        
+    @property
+    def value(self):
+        return self._value
+    
+    @value.setter
+    def value(self, value: str):
+        Email.validate(value)
         
         self._value = value
 
@@ -58,6 +82,17 @@ class Birthday(Field):
 
     def __str__(self):
         return self.value.strftime(Birthday.format)
+    
+    @staticmethod
+    def parse(value: str) -> date:
+        return datetime.strptime(value, Birthday.format).date()
+
+    @staticmethod
+    def validate(value: str) -> datetime:
+        try:
+            Birthday.parse(value)
+        except ValueError as exc:
+            raise BirthdayValueError("Invalid date format. Use DD.MM.YYYY") from exc
 
     @property
     def value(self):
@@ -65,11 +100,9 @@ class Birthday(Field):
     
     @value.setter
     def value(self, value: str):
-        try:
-            date = datetime.strptime(value, Birthday.format)
-            self._value = date.date()
-        except ValueError as exc:
-            raise BirthdayValueError("Invalid date format. Use DD.MM.YYYY") from exc
+        Birthday.validate(value)
+
+        self._value = Birthday.parse(value)
         
 class Address:
     def __init__(self, street, city, state, zip_code, country):
@@ -84,15 +117,15 @@ class Address:
     
 class Contact:
     """Contact class for storing contact information."""
-    def __init__(self, name):
+    def __init__(self, name, phones=None, email=None, birthday=None):
         self.name = Name(name)
-        self.phones = []
-        self.birthday = None
-        self.email = None
+        self.phones = [Phone(p) for p in phones] if phones else []
+        self.birthday = Birthday(birthday) if birthday else None
+        self.email = Email(email) if email else None
         self.address = None
 
     def __str__(self):
-        return f"Contact name: {self.name.value}, phones: {'; '.join(p.value for p in self.phones)}, birthday: {self.birthday or NOT_SPECIFIED_FIELD_VALUE}, email: {self.email or NOT_SPECIFIED_FIELD_VALUE}, address: {self.address or NOT_SPECIFIED_FIELD_VALUE}"
+        return f"Contact name: {self.name}, phones: {'; '.join(p.value for p in self.phones)}, birthday: {self.birthday or NOT_SPECIFIED_FIELD_VALUE}, email: {self.email or NOT_SPECIFIED_FIELD_VALUE}, address: {self.address or NOT_SPECIFIED_FIELD_VALUE}"
     
     def add_phone(self, phone: str) -> None:
         """Add phone to record if it's valid, otherwise handle ValueError."""
@@ -115,14 +148,15 @@ class Contact:
                 return p
         return None
 
-    def edit_email(self, new_email: str) -> None:
+    def set_email(self, email: str) -> None:
         """Edit email in record."""
-        self.email = Email(new_email)
+        self.email = Email(email)
 
     def remove_email(self) -> None:
+        """Set email in record if it exists."""
         self.email = None
     
-    def add_birthday(self, birthday: str) -> None:
+    def set_birthday(self, birthday: str) -> None:
         """Add birthday to record if it's valid, otherwise handle ValueError."""
         self.birthday = Birthday(birthday)
 
@@ -140,6 +174,7 @@ class Contact:
             self.address.state = state if state else self.address.state
             self.address.zip_code = zip_code if zip_code else self.address.zip_code
             self.address.country = country if country else self.address.country
+    
 
 class ContactsBook(UserDict):
     """Class representing a contacts book."""
