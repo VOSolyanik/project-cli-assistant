@@ -48,7 +48,7 @@ class NotesHandler():
             case _:
                 return Colorizer.error("Invalid command.")
 
-    @input_error()
+    @input_error({ValueError: "Note title and content are required"})
     def __add_note(self, *args) -> str:
         """
         Adds note to notebook dictionary
@@ -65,10 +65,10 @@ class NotesHandler():
 
         return message
 
-    @input_error()
+    @input_error({ValueError: "Note title and content are required"})
     def __change_note(self, *args) -> str:
         """
-        Change (replace content) for note by given title
+        Change (replace) content for note by given title
         """
         title, content = args
         record = self.book.find(title)
@@ -81,7 +81,7 @@ class NotesHandler():
 
         return message
 
-    @input_error()
+    @input_error({ValueError: "Note title are required"})
     def __delete_note(self, *args) -> str:
         title = args[0]
         record = self.book.find(title)
