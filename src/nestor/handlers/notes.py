@@ -7,17 +7,27 @@ class NotesHandler():
     Notes handler class
     book: NotesBook - notes book instance
     """
+
+    NOTES_COMMAND = "notes"
+    ADD_NOTE = "add-note"
+    DELETE_NOTE = "delete-note"
+    CHANGE_NOTE = "change-note"
+
     def __init__(self, book: NotesBook):
         self.book = book
 
+
     @staticmethod
     def get_available_commands() -> list[str]:
-        """Returns list of available commands"""
+        """
+        Returns list of available commands
+        """
         return [
-            "addnote",
-            "changenote",
-            "deletenote",
-            "allnotes"
+            NotesHandler.NOTES_COMMAND,
+            NotesHandler.DELETE_NOTE,
+            NotesHandler.ADD_NOTE,
+            NotesHandler.CHANGE_NOTE,
+
         ]
 
     def handle(self, command: str, *args: list[str]) -> str:
@@ -27,13 +37,13 @@ class NotesHandler():
         args: list[str] - command arguments
         """
         match command:
-            case "addnote":
+            case NotesHandler.ADD_NOTE:
                 return self.__add_note(*args)
-            case "changenote":
+            case NotesHandler.CHANGE_NOTE:
                 return self.__change_note(*args)
-            case "deletenote":
+            case NotesHandler.DELETE_NOTE:
                 return self.__delete_note(*args)
-            case "allnotes":
+            case NotesHandler.NOTES_COMMAND:
                 return self.__get_all_notes()
             case _:
                 return Colorizer.error("Invalid command.")
@@ -49,9 +59,9 @@ class NotesHandler():
         if note is None:
             note = Note(title, content)
             self.book.add_note(note)
-            message = Colorizer.success(f"Note with {title} added.")
+            message = Colorizer.success(f"Note \"{title}\" added.")
         else:
-            message = Colorizer.warn(f"Note with title {title} already exist.")
+            message = Colorizer.warn(f"Note \"{title}\" already exist.")
 
         return message
 
@@ -64,10 +74,10 @@ class NotesHandler():
         record = self.book.find(title)
 
         if record is None:
-            message = Colorizer.warn(f"Could not find Note with title {title}.")
+            message = Colorizer.warn(f"Could not find Note \"{title}\".")
         else:
             record.change_content(content)
-            message = Colorizer.success(f"Content for Note {title} was changed.")
+            message = Colorizer.success(f"Content for Note \"{title}\" was changed.")
 
         return message
 
@@ -77,10 +87,10 @@ class NotesHandler():
         record = self.book.find(title)
 
         if record is None:
-            message = Colorizer.warn(f"Could not find Note with title {title}.")
+            message = Colorizer.warn(f"Could not find Note \"{title}\".")
         else:
             self.book.delete(title)
-            message = Colorizer.warn(f"Note with title {title} deleted.")
+            message = Colorizer.warn(f"Note \"{title}\" deleted.")
 
         return message
 
