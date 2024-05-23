@@ -39,7 +39,7 @@ class Note:
         """Return a string representation of the note."""
         tags_str = ", ".join(self.tags) if self.tags else "No tags"
         content_str = self.content if self.content else "No content"
-        return f"Title: {self.title}, Tags: {tags_str}, \n Content: {content_str}"
+        return f"Title: {self.title.value}, Tags: {tags_str}, \n Content: {content_str.value}"
 
 
 class NotesBook(UserDict):
