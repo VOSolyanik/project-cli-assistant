@@ -7,14 +7,14 @@ class Note:
         """Initialize a new Note."""
         self.title = title
         self.tags = tags if tags else []  # Initialize tags
-        self.note_content = content if content else None  # Initialize note content
+        self.content = content if content else None  # Initialize note content
 
-    def add_tag(self, tag):
+    def add_tag(self, tag: str):
         """Add a new tag to the note if it does not already exist."""
         if tag not in self.tags:
             self.tags.append(tag)
 
-    def delete_tag(self, tag):
+    def delete_tag(self, tag: str):
         """Delete a tag from the note if it exists."""
         if tag in self.tags:
             self.tags.remove(tag)
@@ -27,7 +27,7 @@ class Note:
         """Return a string representation of the note."""
         tags_str = ", ".join(self.tags) if self.tags else "No tags"
         content_str = self.note_content if self.note_content else "No content"
-        return f"Title: {self.title}, Tags: [{tags_str}], Content: {content_str}"
+        return f"Title: {self.title}, Tags: {tags_str}, \n Content: {content_str}"
 
 class NotesBook(UserDict):
     """Class representing a NotesBook."""
@@ -42,8 +42,7 @@ class NotesBook(UserDict):
 
     def delete(self, title):
         """Delete a Note from the NotesBook by its title."""
-        if title in self.data:
-            del self.data[title]
+        self.data.pop(title, None)
 
     def __str__(self):
         """Return a string representation of all notes in the NotesBook."""
