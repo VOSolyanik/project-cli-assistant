@@ -220,6 +220,9 @@ class Contact:
     def __str__(self):
         return f"Contact name: {self.name}, phones: {'; '.join(p.value for p in self.phones)}, birthday: {self.birthday or NOT_SPECIFIED_FIELD_VALUE}, email: {self.email or NOT_SPECIFIED_FIELD_VALUE}, address: {self.address or NOT_SPECIFIED_FIELD_VALUE}"
     
+    def rename(self, new_name: str) -> None:
+        self.name = Name(new_name)
+
     def add_phone(self, phone: str) -> None:
         """Add phone to record if it's valid, otherwise handle ValueError."""
         self.phones.append(Phone(phone))
