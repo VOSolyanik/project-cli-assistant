@@ -1,4 +1,6 @@
-from nestor.models.notes_book import NotesBook
+from models.notes_book import NotesBook, Note
+from utils.input_error import input_error
+from services.colorizer import Colorizer
 
 class NotesHandler():
     """
@@ -10,10 +12,13 @@ class NotesHandler():
 
     @staticmethod
     def get_available_commands() -> list[str]:
-        """
-        Returns list of available commands
-        """
-        return []
+        """Returns list of available commands"""
+        return [
+            "addnote",
+            "changenote",
+            "deletenote",
+            "allnotes"
+        ]
 
     def handle(self, command: str, *args: list[str]) -> str:
         """
@@ -21,5 +26,67 @@ class NotesHandler():
         command: str - user command
         args: list[str] - command arguments
         """
-        pass
-    
+        match command:
+            case "addnote":
+                return self.__add_note(*args)
+            case "changenote":
+                return self.__change_note(*args)
+            case "deletenote":
+                return self.__delete_note(*args)
+            case "allnotes":
+                return self.__get_all_notes()
+            case _:
+                return Colorizer.error("Invalid command.")
+
+    @input_error()
+    def __add_note(self, *args) -> str:
+        """
+        Adds note to notebook dictionary
+        """
+        title, content = args
+        note = self.book.find(title)
+
+        if note is None:
+            note = Note(title, content)
+            self.book.add_note(note)
+            message = Colorizer.success(f"Note with {title} added.")
+        else:
+            message = Colorizer.warn(f"Note with title {title} already exist.")
+
+        return message
+
+    @input_error()
+    def __change_note(self, *args) -> str:
+        """
+        Change (replace content) for note by given title
+        """
+        title, content = args
+        record = self.book.find(title)
+
+        if record is None:
+            message = Colorizer.warn(f"Could not find Note with title {title}.")
+        else:
+            record.change_content(content)
+            message = Colorizer.success(f"Content for Note {title} was changed.")
+
+        return message
+
+    @input_error()
+    def __delete_note(self, *args) -> str:
+        title = args[0]
+        record = self.book.find(title)
+
+        if record is None:
+            message = Colorizer.warn(f"Could not find Note with title {title}.")
+        else:
+            self.book.delete(title)
+            message = Colorizer.warn(f"Note with title {title} deleted.")
+
+        return message
+
+    @input_error()
+    def __get_all_notes(self, *args) -> str:
+        if not self.book.data:
+            return Colorizer.warn("Notes not found")
+
+        return Colorizer.highlight("\n".join([str(record) for record in self.book.data.values()]))
