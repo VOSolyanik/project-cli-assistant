@@ -7,6 +7,30 @@ from nestor.utils.input_error import input_error
 from nestor.models.contacts_book import City, ContactsBook, Contact, Birthday, Country, Email, Name, Phone, State, ZipCode
 from nestor.services.colorizer import Colorizer
 from nestor.utils.to_csv import to_csv
+from datetime import datetime, timedelta
+
+def get_days_range(this_or_next, week_or_month):
+    today = datetime.today()
+    
+    if week_or_month == "week":
+        if this_or_next == "this":
+            start_days = 0
+            end_days = 6 - today.weekday()
+        elif this_or_next == "next":
+            start_days = 7 - today.weekday()
+            end_days = start_days + 6
+    elif week_or_month == "month":
+        if this_or_next == "this":
+            start_days = 0
+            next_month = (today.month % 12) + 1
+            end_days = (datetime(today.year, next_month, 1) - timedelta(days=1)).day - today.day
+        elif this_or_next == "next":
+            first_day_next_month = datetime(today.year, (today.month % 12) + 1, 1)
+            start_days = (first_day_next_month - today).days
+            next_month = (first_day_next_month.month % 12) + 1
+            end_days = start_days + (datetime(first_day_next_month.year, next_month, 1) - timedelta(days=1)).day - 1
+
+    return start_days, end_days
 
 class ContactsHandler():
     """
@@ -102,7 +126,7 @@ class ContactsHandler():
             case ContactsHandler.SEARCH_CONTACTS_COMMAND:
                 return self.__search_contacts(*args)
             case _:
-                return Colorizer.error("Invalid command.")
+                return Colorizer.error("Invalid command.")     
     @input_error({ValueError: "Contact adding interrupted. Contact not added."})
     def __add_contact(self) -> str:
         """
@@ -314,14 +338,33 @@ class ContactsHandler():
         
         return Colorizer.success(str(contact.birthday))
     
-    @input_error({ValueError: "Days must be a non-negative integer.", IndexError: "Number of days is required"})
+    @input_error({ValueError: "Invalid period specified. Use 'tomorrow', 'this week', 'this month', 'next week', 'next month', or a non-negative number of days.", IndexError: "Number of days or period is required"})
     def __get_upcoming_birthdays(self, *args) -> str:
         """
-        Returns all upcoming birthdays within the given number of days
+        Returns all upcoming birthdays within the given period ('tomorrow', 'this week', 'this month', 'next week', 'next month') or number of days
         """
         
-        days = int(args[0])
-        birthdays = self.book.get_upcoming_birthdays(days)
+        period_mapping = {
+            "tomorrow": (1, 1),
+            "this week": get_days_range("this", "week"),
+            "this month": get_days_range("this", "month"),
+            "next week": get_days_range("next", "week"),
+            "next month": get_days_range("next", "month")
+        }
+        
+        period = " ".join(args).lower()
+        if period in period_mapping:
+            start_days, days = period_mapping[period]
+        else:
+            try:
+                start_days = 0
+                days = int(args[0])
+                if days < 0:
+                    raise ValueError("Days must be a non-negative integer.")
+            except ValueError:
+                raise ValueError("Invalid period specified. Use 'tomorrow', 'this week', 'this month', 'next week', 'next month', or a non-negative number of days.")
+        
+        birthdays = self.book.get_upcoming_birthdays(days, start_days)
         
         if not birthdays:
             return Colorizer.warn("No upcoming birthdays found.")
