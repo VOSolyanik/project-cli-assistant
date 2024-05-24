@@ -1,6 +1,9 @@
-from models.notes_book import NotesBook, Note
-from utils.input_error import input_error
-from services.colorizer import Colorizer
+from nestor.models.notes_book import NotesBook, Note
+from nestor.services.ui import UserInterface
+from nestor.utils.input_error import input_error
+from nestor.services.colorizer import Colorizer
+from nestor.utils.to_csv import to_csv
+from nestor.utils.csv_as_table import csv_as_table
 
 class NotesHandler():
     """
@@ -12,9 +15,11 @@ class NotesHandler():
     ADD_NOTE = "add-note"
     DELETE_NOTE = "delete-note"
     CHANGE_NOTE = "change-note"
+    SEARCH_NOTES = "search-note"
 
-    def __init__(self, book: NotesBook):
+    def __init__(self, book: NotesBook, cli: UserInterface):
         self.book = book
+        self.cli = cli
 
 
     @staticmethod
@@ -27,7 +32,7 @@ class NotesHandler():
             NotesHandler.DELETE_NOTE,
             NotesHandler.ADD_NOTE,
             NotesHandler.CHANGE_NOTE,
-
+            NotesHandler.SEARCH_NOTES
         ]
 
     def handle(self, command: str, *args: list[str]) -> str:
@@ -45,10 +50,12 @@ class NotesHandler():
                 return self.__delete_note(*args)
             case NotesHandler.NOTES_COMMAND:
                 return self.__get_all_notes()
+            case NotesHandler.SEARCH_NOTES:
+                return self.__search_notes(*args)
             case _:
                 return Colorizer.error("Invalid command.")
 
-    @input_error()
+    @input_error({ValueError: "Note title and content are required"})
     def __add_note(self, *args) -> str:
         """
         Adds note to notebook dictionary
@@ -65,10 +72,10 @@ class NotesHandler():
 
         return message
 
-    @input_error()
+    @input_error({ValueError: "Note title and content are required"})
     def __change_note(self, *args) -> str:
         """
-        Change (replace content) for note by given title
+        Change (replace) content for note by given title
         """
         title, content = args
         record = self.book.find(title)
@@ -81,7 +88,7 @@ class NotesHandler():
 
         return message
 
-    @input_error()
+    @input_error({ValueError: "Note title are required"})
     def __delete_note(self, *args) -> str:
         title = args[0]
         record = self.book.find(title)
@@ -93,10 +100,24 @@ class NotesHandler():
             message = Colorizer.warn(f"Note \"{title}\" deleted.")
 
         return message
+    
+    @input_error({IndexError: "Search string is required"})
+    def __search_notes(self, *args) -> str:
+        """
+        Searches notes by title, content
+        args: list[str] - command arguments
+        """
+        search_str = args[0]
+        notes = self.book.search(search_str)
+        
+        if not notes:
+            return Colorizer.warn("No notes found")
+        
+        return csv_as_table(to_csv(notes))
 
     @input_error()
     def __get_all_notes(self, *args) -> str:
         if not self.book.data:
             return Colorizer.warn("Notes not found")
 
-        return Colorizer.highlight("\n".join([str(record) for record in self.book.data.values()]))
+        return csv_as_table(to_csv(list(self.book.data.values())))

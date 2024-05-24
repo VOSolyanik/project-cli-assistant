@@ -1,17 +1,52 @@
 from collections import UserDict
-from .contacts_book import Field
+from nestor.models.contacts_book import Field
+from nestor.models.exceptions import TitleValueError, ContentValueError
 
 
 class Title(Field):
     """Class representing a name title."""
-    pass
+
+    MAX_TITLE_LENGTH = 20
+
+    @staticmethod
+    def validate(value: str) -> None:
+        if value is None or len(value) == 0:
+            raise TitleValueError("Title is required")
+        if value is None or len(value) > Title.MAX_TITLE_LENGTH:
+            raise TitleValueError(f"Title should be less then {Title.MAX_TITLE_LENGTH} symbols")
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, value: str):
+        Title.validate(value)
+
+        self._value = value
 
 
 class Content(Field):
     """Class representing a name content."""
-    pass
 
+    MAX_CONTENT_LENGTH = 200
 
+    @staticmethod
+    def validate(value: str) -> None:
+        if value is None or len(value) > Content.MAX_CONTENT_LENGTH:
+            raise ContentValueError(f"Content should be less then {Content.MAX_CONTENT_LENGTH} symbols")
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, value: str):
+        Content.validate(value)
+
+        self._value = value
+
+        
 class Note:
     """Class representing a record for NotesBook."""
 
@@ -37,9 +72,11 @@ class Note:
 
     def __str__(self):
         """Return a string representation of the note."""
+
         tags_str = ", ".join(self.tags) if self.tags else "No tags"
         content_str = self.content if self.content else "No content"
-        return f"Title: {self.title.value}, Tags: {tags_str}, \n Content: {content_str.value}"
+        return f"Title: {self.title}, Tags: {tags_str}, \n Content: {content_str}"
+
 
 
 class NotesBook(UserDict):
@@ -56,6 +93,17 @@ class NotesBook(UserDict):
     def delete(self, title: str):
         """Delete a Note from the NotesBook by its title."""
         del self.data[title]
+
+    def search(self, search_str: str) -> list[Note]:
+        """Search records by title and content."""
+
+        result = []
+        for record in self.data.values():
+            if (search_str.lower() in str(record.title).lower() or
+                (search_str.lower() in str(record.content).lower())):
+                result.append(record)
+        return result
+
 
     def __str__(self):
         """Return a string representation of all notes in the NotesBook."""

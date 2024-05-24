@@ -4,7 +4,7 @@ from collections import UserDict
 from datetime import datetime, timedelta, date
 
 from nestor.models.constants import NOT_SPECIFIED_FIELD_VALUE
-from nestor.models.exceptions import NameValueError, PhoneValueError, BirthdayValueError, EmailValueError
+from nestor.models.exceptions import AddressValueError, NameValueError, PhoneValueError, BirthdayValueError, EmailValueError
 
 class Field:
     """Base class for fields."""
@@ -103,17 +103,105 @@ class Birthday(Field):
         Birthday.validate(value)
 
         self._value = Birthday.parse(value)
+
+class Street(Field):
+    """Class representing street name from address."""
+
+    @property
+    def value(self):
+        return self._value
+    
+    @value.setter
+    def value(self, value: str):
+        self._value = value
+
+class City(Field):
+    """Class representing city from address."""
+
+    @staticmethod
+    def validate(value: str) -> None:
+        if not value[0].isupper():
+            raise AddressValueError("City name should start with capital letter")
+                                 
+    @property
+    def value(self):
+        return self._value
+    
+    @value.setter
+    def value(self, value: str):
+        City.validate(value)
+        
+        self._value = value
+
+class State(Field):
+    """Class representing state from address."""
+
+    @staticmethod
+    def validate(value: str) -> None:
+        if not value[0].isupper():
+            raise AddressValueError("State name should start with capital letter")
+                 
+    @property
+    def value(self):
+        return self._value
+    
+    @value.setter
+    def value(self, value: str):
+        self._value = value
+
+class ZipCode(Field):
+    """Class representing zip code from address."""
+
+    @staticmethod
+    def validate(value: str) -> None:
+        if not value.isdigit():
+            raise AddressValueError("Zip code must contain only digits")
+                                 
+    @property
+    def value(self):
+        return self._value
+    
+    @value.setter
+    def value(self, value: str):
+        ZipCode.validate(value)
+        
+        self._value = value
+
+class Country(Field):
+    """Class representing country from address."""
+
+    @staticmethod
+    def validate(value: str) -> None:
+        if not value[0].isupper():
+            raise AddressValueError("Country name should start with capital letter")
+                                 
+    @property
+    def value(self):
+        return self._value
+    
+    @value.setter
+    def value(self, value: str):
+        Country.validate(value)
+        
+        self._value = value
         
 class Address:
-    def __init__(self, street, city, state, zip_code, country):
-        self.street = street
-        self.city = city
-        self.state = state
-        self.zip_code = zip_code
-        self.country = country
+    def __init__(self, street: str, city: str, state: str, zip_code: str, country: str):
+        self.street = Street(street) if street else None
+        self.city = City(city) if city else None
+        self.state = State(state) if state else None
+        self.zip_code = ZipCode(zip_code) if zip_code else None
+        self.country = Country(country) if country else None
+
+    def edit(self, street: str = None, city: str = None, state: str = None, zip_code: str = None, country: str = None):
+        self.street = Street(street) if street else self.street
+        self.city = City(city) if city else self.city
+        self.state = State(state) if state else self.state
+        self.zip_code = ZipCode(zip_code) if zip_code else self.zip_code
+        self.country = Country(country) if country else self.country
 
     def __str__(self):
-        return f"{self.street}, {self.city}, {self.state}, {self.zip_code}, {self.country}"
+        return f"{self.street}, {self.city}{(', ' + str(self.state)) if not self.state is None else ''}{(', ' + str(self.zip_code)) if not self.zip_code is None else ''}, {self.country}"
     
 class Contact:
     """Contact class for storing contact information."""
@@ -127,6 +215,9 @@ class Contact:
     def __str__(self):
         return f"Contact name: {self.name}, phones: {'; '.join(p.value for p in self.phones)}, birthday: {self.birthday or NOT_SPECIFIED_FIELD_VALUE}, email: {self.email or NOT_SPECIFIED_FIELD_VALUE}, address: {self.address or NOT_SPECIFIED_FIELD_VALUE}"
     
+    def rename(self, new_name: str) -> None:
+        self.name = Name(new_name)
+
     def add_phone(self, phone: str) -> None:
         """Add phone to record if it's valid, otherwise handle ValueError."""
         self.phones.append(Phone(phone))
@@ -169,11 +260,7 @@ class Contact:
         if not self.address:
             self.address = Address(street, city, state, zip_code, country)
         else:
-            self.address.street = street if street else self.address.street
-            self.address.city = city if city else self.address.city
-            self.address.state = state if state else self.address.state
-            self.address.zip_code = zip_code if zip_code else self.address.zip_code
-            self.address.country = country if country else self.address.country
+            self.address.edit(street, city, state, zip_code, country)
     
 
 class ContactsBook(UserDict):
