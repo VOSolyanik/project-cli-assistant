@@ -107,19 +107,12 @@ class Birthday(Field):
 class Street(Field):
     """Class representing street name from address."""
 
-    @staticmethod
-    def validate(value: str) -> None:
-        if value is None or len(value) == 0:
-            raise AddressValueError("Street name is required")
-                                 
     @property
     def value(self):
         return self._value
     
     @value.setter
     def value(self, value: str):
-        Street.validate(value)
-        
         self._value = value
 
 class City(Field):
@@ -127,10 +120,8 @@ class City(Field):
 
     @staticmethod
     def validate(value: str) -> None:
-        if value is None or len(value) == 0:
-            raise AddressValueError("City name is required")
-        elif not value[0].isupper():
-            raise AddressValueError("City name should start with upper case letter")
+        if not value[0].isupper():
+            raise AddressValueError("City name should start with capital letter")
                                  
     @property
     def value(self):
@@ -144,6 +135,12 @@ class City(Field):
 
 class State(Field):
     """Class representing state from address."""
+
+    @staticmethod
+    def validate(value: str) -> None:
+        if not value[0].isupper():
+            raise AddressValueError("State name should start with capital letter")
+                 
     @property
     def value(self):
         return self._value
@@ -157,8 +154,8 @@ class ZipCode(Field):
 
     @staticmethod
     def validate(value: str) -> None:
-        if value is None or len(value) == 0:
-            raise AddressValueError("Zip code is required")
+        if not value.isdigit():
+            raise AddressValueError("Zip code must contain only digits")
                                  
     @property
     def value(self):
@@ -175,10 +172,8 @@ class Country(Field):
 
     @staticmethod
     def validate(value: str) -> None:
-        if value is None or len(value) == 0:
-            raise AddressValueError("Country is required")
-        elif not value[0].isupper():
-            raise AddressValueError("Country name should start with upper case letter")
+        if not value[0].isupper():
+            raise AddressValueError("Country name should start with capital letter")
                                  
     @property
     def value(self):
@@ -192,11 +187,11 @@ class Country(Field):
         
 class Address:
     def __init__(self, street: str, city: str, state: str, zip_code: str, country: str):
-        self.street = Street(street)
-        self.city = City(city)
+        self.street = Street(street) if street else None
+        self.city = City(city) if city else None
         self.state = State(state) if state else None
-        self.zip_code = ZipCode(zip_code)
-        self.country = Country(country)
+        self.zip_code = ZipCode(zip_code) if zip_code else None
+        self.country = Country(country) if country else None
 
     def edit(self, street: str = None, city: str = None, state: str = None, zip_code: str = None, country: str = None):
         self.street = Street(street) if street else self.street
@@ -206,7 +201,7 @@ class Address:
         self.country = Country(country) if country else self.country
 
     def __str__(self):
-        return f"{self.street}, {self.city}{(', ' + str(self.state)) if not self.state is None else ''}, {self.zip_code}, {self.country}"
+        return f"{self.street}, {self.city}{(', ' + str(self.state)) if not self.state is None else ''}{(', ' + str(self.zip_code)) if not self.zip_code is None else ''}, {self.country}"
     
 class Contact:
     """Contact class for storing contact information."""

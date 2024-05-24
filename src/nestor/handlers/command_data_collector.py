@@ -1,27 +1,31 @@
-from collections import namedtuple
+from typing import Callable, List, Optional
 
 from nestor.models.exceptions import FieldRequiredError
 from nestor.services.colorizer import Colorizer
+from nestor.services.ui import UserInterface
 
-FieldInput = namedtuple("FieldInput", ["prompt", "validator", "is_required"])
+class FieldInput:
+    def __init__(self, prompt:str, default_value:str = "", validator:Callable = None, is_required:bool = False, children: Optional[List['FieldInput']] = None):
+        self.prompt = prompt
+        self.validator = validator
+        self.is_required = is_required
+        self.default_value = str(default_value) if default_value and str(default_value) else None
+        self.children = children
 
-def contact_input(fields: list[FieldInput]):
-    """
-    Collects input from the user for a list of fields.
 
-    Args:
-        fields (list[FieldInput]): A list of FieldInput objects representing the fields to collect input for.
-
-    Yields:
-        Union[str, FieldRequiredError, Exception, list[str]]: Yields prompts for each field, and handles validation and error handling.
-
-    Returns:
-        list[str]: A list of collected input values for each field.
-    """
+def field_input(fields: list[FieldInput], cli: UserInterface, indent: int):
+    """ Collects input from the user for a list of fields. """
     result = []
     for field in fields:
         while True:
-            value = yield f"{field.prompt}: "
+            value = ""
+            if field.children:
+                cli.output(Colorizer.highlight(f"{' ' * indent}{field.prompt}: "))
+                value = command_data_collector(field.children, cli, indent + 2)
+            else:
+                value = yield (f"{' ' * indent}{field.prompt}: ", field.default_value if field.default_value else None)
+                value = value.strip() if value else None
+
             if not value and field.is_required:
                 yield FieldRequiredError(f"{field.prompt} is required")
                 continue
@@ -31,34 +35,28 @@ def contact_input(fields: list[FieldInput]):
                 except Exception as e:
                     yield e
                     continue
-            result.append(value.strip() if value else None)
+            result.append(value)
             break
     yield result
 
-def command_data_collector(fields: list[FieldInput]) -> list[str | None]:
-    """
-    Collects user input for the given fields.
-
-    Args:
-        fields (list[FieldInput]): A list of FieldInput objects representing the fields to collect data for.
-
-    Returns:
-        Any: The collected data.
-
-    Raises:
-        StopIteration: If the generator is exhausted and returns a value.
-    """
-    generator = contact_input(fields)
+def command_data_collector(fields: list[FieldInput], cli: UserInterface, indent = 2) -> list[str | None]:
+    """ Collects user input for the given fields. """
+    generator = field_input(fields, cli, indent)
     prompt = next(generator)  # Initialize the generator
+    default_value = None
+
+    if isinstance(prompt, tuple):
+        default_value = prompt[1]
+        prompt = prompt[0]
     
     while True:
         user_input = ""
         try:
-            user_input = input(Colorizer.highlight(prompt))
+            user_input = cli.prompt(prompt, default_value)
 
         # handle Exit on Ctrl+C
         except KeyboardInterrupt:
-            print("\n")
+            cli.output("\n")
             break
             
         try:
@@ -67,8 +65,11 @@ def command_data_collector(fields: list[FieldInput]) -> list[str | None]:
                 e = StopIteration(prompt)
                 raise e
             if isinstance(prompt, Exception):
-                print(Colorizer.error(prompt))
+                cli.output(' ' * indent + Colorizer.error(prompt))
                 prompt = next(generator)
+            if isinstance(prompt, tuple):
+                default_value = prompt[1]
+                prompt = prompt[0]
         except StopIteration as e:
             return e.value
     return []
