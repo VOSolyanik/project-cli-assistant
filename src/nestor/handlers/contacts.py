@@ -275,7 +275,7 @@ class ContactsHandler():
             "next month": get_days_range("next", "month")
         }
         
-        period = args[0].lower()
+        period = " ".join(args).lower()
         if period in period_mapping:
             start_days, days = period_mapping[period]
         else:
