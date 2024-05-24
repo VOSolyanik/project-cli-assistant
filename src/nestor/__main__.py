@@ -15,37 +15,28 @@ def parse_input(user_input: str) -> Tuple[str, List[str]]:
     args = parts[1:]
     return cmd, *args
 
-def help(command=None):
-    commands = {
-        "phone": "Show phone number by contact name. Example: phone <name>",
-        "add-contact": "Add a contact. Example: add-contact <name> <phone>",
-        "edit-contact": "Edit a contact. Example: edit-contact <name> <new phone>",
-        "delete-contact": "Delete a contact. Example: delete-contact <name>",
-        "show-birthday": "Show birthday by contact name. Example: show-birthday <name>",
-        "add-birthday": "Add a birthday. Example: add-birthday <name> <date>",
-        "birthdays": "Show upcoming birthdays. Example: birthdays <number of days>",
-        "add-email": "Add an email. Example: add-email <name> <email>",
-        "edit-email": "Edit an email. Example: edit-email <name> <new email>",
-        "show-email": "Show email by contact name. Example: show-email <name>",
-        "delete-email": "Delete an email. Example: delete-email <name>",
-        "add-address": "Add an address. Example: add-address <name> <street> <city> <state> <zip_code> <country>",
-        "edit-address": "Edit an address. Example: edit-address <name> <new street> <new city> <new state> <new zip_code> <new country>",
-        "contacts": "Show all contacts. Example: contacts",
-        "search-contacts": "Search contacts. Example: search-contacts <search string>"
-    }
-
+def help_handler(contacts_handler, notes_handler, command=None):
     if command:
-        if command in commands:
-            help_message = f"{command}: {commands[command]}\n"
+        if command in ContactsHandler.get_available_commands():
+            return contacts_handler.help(command)
+        elif command in NotesHandler.get_available_commands():
+            return notes_handler.help(command)
         else:
-            help_message = f"No help available for {command}\n"
+            return "No help available for that command."
     else:
-        help_message = "Available commands:\n"
-        for cmd, description in commands.items():
-            help_message += f"{cmd}: {description}\n"
+        return ("Available sections:\n"
+                "1. Contacts\n"
+                "2. Notes\n"
+                "Please specify the section you need help with by typing 'help contacts' or 'help notes'.\n"
+                "You can also get information about a specific command by typing 'help <command>'. For example, 'help add-note'.")
 
-    return Colorizer.info(help_message)
-
+def section_help_handler(contacts_handler, notes_handler, section):
+    if section == "contacts":
+        return contacts_handler.help()
+    elif section == "notes":
+        return notes_handler.help()
+    else:
+        return "Invalid section. Please choose 'contacts' or 'notes'."
 
 def main():
     # load ContactsBook and initialize contacts handler
@@ -77,9 +68,14 @@ def main():
             ui.output(Colorizer.highlight("How can I help you?"))
         elif command == "help":
             if args:
-                ui.output(help(args[0]))
+                if args[0] in ["contacts", "notes"]:
+                    ui.output(Colorizer.info(section_help_handler(contacts_handler, notes_handler, args[0])))
+                else:
+                    help_message = help_handler(contacts_handler, notes_handler, args[0])
+                    ui.output(Colorizer.info(help_message))
             else:
-                ui.output(help())
+                help_message = help_handler(contacts_handler, notes_handler)
+                ui.output(Colorizer.info(help_message))
         elif command in ContactsHandler.get_available_commands():
             ui.output(contacts_handler.handle(command, *args))
         elif command in NotesHandler.get_available_commands():

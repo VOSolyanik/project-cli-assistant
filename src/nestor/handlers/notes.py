@@ -8,7 +8,7 @@ class NotesHandler():
     book: NotesBook - notes book instance
     """
 
-    NOTES_COMMAND = "notes"
+    NOTES_COMMAND = "all-notes"
     ADD_NOTE = "add-note"
     DELETE_NOTE = "delete-note"
     CHANGE_NOTE = "change-note"
@@ -29,6 +29,26 @@ class NotesHandler():
             NotesHandler.CHANGE_NOTE,
 
         ]
+    
+    def help(self, command=None):
+        commands = {
+            self.NOTES_COMMAND: "Show all notes. Example: all-notes",
+            self.ADD_NOTE: "Add a note. Example: add-note <title> <content>",
+            self.DELETE_NOTE: "Delete a note. Example: delete-note <title>",
+            self.CHANGE_NOTE: "Change a note. Example: change-note <title> <new content>"
+        }
+
+        if command:
+            if command in commands:
+                help_message = f"{command}: {commands[command]}\n"
+            else:
+                help_message = f"No help available for {command}\n"
+        else:
+            help_message = "Available commands:\n"
+            for cmd, description in commands.items():
+                help_message += f"{cmd}: {description}\n"
+
+        return help_message
 
     def handle(self, command: str, *args: list[str]) -> str:
         """

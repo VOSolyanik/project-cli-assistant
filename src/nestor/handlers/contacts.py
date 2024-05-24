@@ -30,7 +30,7 @@ class ContactsHandler():
     ADD_ADDRESS = "add-address"
     EDIT_ADDRESS = "edit-address"
 
-    CONTACTS_COMMAND = "contacts"
+    CONTACTS_COMMAND = "all-contacts"
     SEARCH_CONTACTS_COMMAND = "search-contacts"
 
     def __init__(self, book: ContactsBook):
@@ -58,6 +58,37 @@ class ContactsHandler():
             ContactsHandler.EDIT_ADDRESS,
             ContactsHandler.SEARCH_CONTACTS_COMMAND
         ]
+    
+    def help(self, command=None):
+        commands = {
+            self.PHONE_COMMAND: "Show phone number by contact name. Example: phone <name>",
+            self.ADD_CONTACT_COMMAND: "Add a contact. Example: add-contact <name> <phone>",
+            self.EDIT_CONTACT_COMMAND: "Edit a contact. Example: edit-contact <name> <new phone>",
+            self.DELETE_CONTACT_COMMAND: "Delete a contact. Example: delete-contact <name>",
+            self.SHOW_BIRTHDAY_COMMAND: "Show birthday by contact name. Example: show-birthday <name>",
+            self.ADD_BIRTHDAY_COMMAND: "Add a birthday. Example: add-birthday <name> <date>",
+            self.BIRTHDAYS_COMMAND: "Show upcoming birthdays. Example: birthdays <number of days>",
+            self.ADD_EMAIL_COMMAND: "Add an email. Example: add-email <name> <email>",
+            self.EDIT_EMAIL_COMMAND: "Edit an email. Example: edit-email <name> <new email>",
+            self.SHOW_EMAIL_COMMAND: "Show email by contact name. Example: show-email <name>",
+            self.DELETE_EMAIL_COMMAND: "Delete an email. Example: delete-email <name>",
+            self.ADD_ADDRESS: "Add an address. Example: add-address <name> <street> <city> <state> <zip_code> <country>",
+            self.EDIT_ADDRESS: "Edit an address. Example: edit-address <name> <new street> <new city> <new state> <new zip_code> <new country>",
+            self.CONTACTS_COMMAND: "Show all contacts. Example: all-contacts",
+            self.SEARCH_CONTACTS_COMMAND: "Search contacts. Example: search-contacts <search string>"
+        }
+
+        if command:
+            if command in commands:
+                help_message = f"{command}: {commands[command]}\n"
+            else:
+                help_message = f"No help available for {command}\n"
+        else:
+            help_message = "Available commands:\n"
+            for cmd, description in commands.items():
+                help_message += f"{cmd}: {description}\n"
+
+        return help_message
 
     def handle(self, command: str, *args: list[str]) -> str:
         """
