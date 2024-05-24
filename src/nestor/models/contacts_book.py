@@ -204,16 +204,16 @@ class ContactsBook(UserDict):
         return result
     
     def get_upcoming_birthdays(self, days: int) -> dict:
-        """Return dict of contacts with upcoming birthdays within the given days."""
+        """Return dict of contacts with upcoming birthdays within the given number of days."""
         today = datetime.today().date()
         upcoming_birthdays = {}
-
+        
         # Iterate through all users
         for record in self.data.values():
             if record.birthday is None:
                 continue
 
-            birthdate: Birthday = record.birthday.value
+            birthdate: datetime = record.birthday.value
             name: str = record.name.value
             # Calculate this year's birthday
             birthdate_this_year = birthdate.replace(year=today.year)
@@ -233,4 +233,3 @@ class ContactsBook(UserDict):
                 upcoming_birthdays[name] = congratulation_date
 
         return upcoming_birthdays
-    

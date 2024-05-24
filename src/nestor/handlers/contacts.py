@@ -237,13 +237,29 @@ class ContactsHandler():
         
         return Colorizer.success(str(contact.birthday))
     
-    @input_error({ValueError: "Days must be a non-negative integer.", IndexError: "Number of days is required"})
+    @input_error({ValueError: "Invalid period specified. Use 'tomorrow', 'next week', 'next month', or a non-negative number of days.", IndexError: "Number of days or period is required"})
     def __get_upcoming_birthdays(self, *args) -> str:
         """
-        Returns all upcoming birthdays within the given number of days
+        Returns all upcoming birthdays within the given period ('tomorrow', 'next week', 'next month') or number of days
         """
         
-        days = int(args[0])
+        period_mapping = {
+            "tomorrow": 1,
+            "next week": 7,
+            "next month": 30
+        }
+        
+        period = args[0].lower()
+        if period in period_mapping:
+            days = period_mapping[period]
+        else:
+            try:
+                days = int(args[0])
+                if days < 0:
+                    raise ValueError("Days must be a non-negative integer.")
+            except ValueError:
+                raise ValueError("Invalid period specified. Use 'tomorrow', 'next week', 'next month', or a non-negative number of days.")
+        
         birthdays = self.book.get_upcoming_birthdays(days)
         
         if not birthdays:
