@@ -1,6 +1,7 @@
-from models.notes_book import NotesBook, Note
-from utils.input_error import input_error
-from services.colorizer import Colorizer
+from nestor.models.notes_book import NotesBook, Note
+from nestor.services.ui import UserInterface
+from nestor.utils.input_error import input_error
+from nestor.services.colorizer import Colorizer
 from nestor.utils.to_csv import to_csv
 from nestor.utils.csv_as_table import csv_as_table
 
@@ -16,8 +17,9 @@ class NotesHandler():
     CHANGE_NOTE = "change-note"
     SEARCH_NOTES = "search-note"
 
-    def __init__(self, book: NotesBook):
+    def __init__(self, book: NotesBook, cli: UserInterface):
         self.book = book
+        self.cli = cli
 
 
     @staticmethod
