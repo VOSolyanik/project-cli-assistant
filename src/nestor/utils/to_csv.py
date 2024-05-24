@@ -13,5 +13,4 @@ def to_csv(data_list: list) -> str:
             else:
                 row.append(str(value))
         rows.append(";".join(row))
-        
     return header + "\n" + "\n".join(rows)
