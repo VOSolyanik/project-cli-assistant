@@ -29,6 +29,8 @@ def input_error(errors_config: dict = {}):
                 return Colorizer.error(errors[ValueError])
             except IndexError as e:
                 return Colorizer.error(errors[IndexError])
+            except KeyboardInterrupt as e:
+                return Colorizer.error(errors[KeyboardInterrupt])
         return inner
     return wrapper
 

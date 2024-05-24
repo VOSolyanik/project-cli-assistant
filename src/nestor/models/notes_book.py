@@ -62,13 +62,21 @@ class Note:
             self.tags.append(tag)
 
     def delete_tag(self, tag: str):
-        """Delete a tag from the note if it exists."""
+        """Delete a tag for the note if it exists."""
         if tag in self.tags:
             self.tags.remove(tag)
 
-    def change_content(self, content: str):
+    def edit_content(self, content: str):
         """Change the content of the note."""
         self.content = Content(content) if content else None
+
+    def edit_title(self, title: str):
+        """Change the title of the note."""
+        self.title = Title(title) if title else None
+
+    def edit_tags(self, tags: list[str]):
+        """Edit a tags for the note if it exists."""
+        self.tags = tags if tags else []
 
     def __str__(self):
         """Return a string representation of the note."""
@@ -78,15 +86,14 @@ class Note:
         return f"Title: {self.title}, Tags: {tags_str}, \n Content: {content_str}"
 
 
-
 class NotesBook(UserDict):
     """Class representing a NotesBook."""
 
-    def add_note(self, note: Note):
+    def add(self, note: Note):
         """Add a Note to the NotesBook."""
         self.data[note.title.value] = note
 
-    def find(self, title: str):
+    def find(self, title: str) -> Note | None:
         """Find a Note by its title."""
         return self.data.get(title, None)
 

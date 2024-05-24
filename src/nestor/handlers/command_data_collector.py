@@ -20,7 +20,7 @@ def field_input(fields: list[FieldInput], cli: UserInterface, indent: int):
         while True:
             value = ""
             if field.children:
-                cli.output(Colorizer.highlight(f"{' ' * indent}{field.prompt}: "))
+                cli.output(Colorizer.info(f"{' ' * indent}{field.prompt}: "))
                 value = command_data_collector(field.children, cli, indent + 2)
             else:
                 value = yield (f"{' ' * indent}{field.prompt}: ", field.default_value if field.default_value else None)
@@ -52,12 +52,12 @@ def command_data_collector(fields: list[FieldInput], cli: UserInterface, indent 
     while True:
         user_input = ""
         try:
-            user_input = cli.prompt(prompt, default_value)
+            user_input = cli.prompt(prompt, default_value, skip_history=True)
 
         # handle Exit on Ctrl+C
-        except KeyboardInterrupt:
+        except KeyboardInterrupt as e:
             cli.output("\n")
-            break
+            raise e
             
         try:
             prompt = generator.send(user_input)
