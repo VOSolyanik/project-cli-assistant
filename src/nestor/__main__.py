@@ -29,7 +29,7 @@ def main():
     while True:
         user_input = ""
         try:
-            user_input = input(Colorizer.info("Enter a command: "))
+            user_input = ui.input(Colorizer.info("Enter a command: "))
         # handle Exit on Ctrl+C
         except KeyboardInterrupt:
             ui.output(Colorizer.highlight("\nGood bye!"))

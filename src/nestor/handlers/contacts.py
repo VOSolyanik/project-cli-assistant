@@ -1,7 +1,8 @@
+import copy
 from nestor.handlers.command_data_collector import FieldInput, command_data_collector
 from nestor.utils.csv_as_table import csv_as_table
 from nestor.utils.input_error import input_error
-from nestor.models.contacts_book import ContactsBook, Contact, Birthday, Email, Field, Name, Phone
+from nestor.models.contacts_book import City, ContactsBook, Contact, Birthday, Country, Email, Field, Name, Phone, State, Street, ZipCode
 from nestor.services.colorizer import Colorizer
 from nestor.models.exceptions import AddressValueError
 from nestor.utils.to_csv import to_csv
@@ -13,6 +14,7 @@ class ContactsHandler():
     """
 
     PHONE_COMMAND = "phone"
+    EDIT_PHONE_COMMAND = "edit-phone"
 
     ADD_CONTACT_COMMAND = "add-contact"
     EDIT_CONTACT_COMMAND = "edit-contact"
@@ -43,6 +45,7 @@ class ContactsHandler():
         """
         return [
             ContactsHandler.PHONE_COMMAND,
+            ContactsHandler.EDIT_PHONE_COMMAND,
             ContactsHandler.DELETE_CONTACT_COMMAND,
             ContactsHandler.ADD_CONTACT_COMMAND,
             ContactsHandler.EDIT_CONTACT_COMMAND,
@@ -68,6 +71,8 @@ class ContactsHandler():
         match command:
             case ContactsHandler.PHONE_COMMAND:
                 return self.__get_phones(*args)
+            case ContactsHandler.EDIT_PHONE_COMMAND:
+                return self.__edit_phone(*args)
             case ContactsHandler.DELETE_CONTACT_COMMAND:
                 return self.__delete_contact(*args) 
             case ContactsHandler.ADD_CONTACT_COMMAND:
@@ -143,9 +148,48 @@ class ContactsHandler():
             message = Colorizer.success(f"Contact {name} updated.")
 
         return message
+    
+    @input_error({ValueError: "Contact editing interrupted. Contact not updated.", IndexError: "Name of the contact is required"})
+    def __edit_contact(self, *args) -> str:
+        """
+        Edits contact in contacts dictionary
+        """
+        name = args[0]
+
+        contact = self.book.find(name)
+
+        if contact is None:
+            message = Colorizer.warn("Contact not found.")
+
+        fields = [
+            FieldInput(prompt=f"Name ({contact.name})", validator=Name.validate, is_required=False),
+            FieldInput(prompt=f"Phone number ({'; '.join([str(item) for item in contact.phones]) if len(contact.phones) else 'None'})", validator=Phone.validate, is_required=False),
+            FieldInput(prompt=f"Date of Birth ({contact.birthday})", validator=Birthday.validate, is_required=False),
+            FieldInput(prompt=f"Email ({contact.email})", validator=Email.validate, is_required=False),
+        ]
+
+        new_name, phone, date, email = command_data_collector(fields)
+
+        if new_name and new_name != contact.name and self.book.find(new_name):
+            return Colorizer.warn(f"Contact with name '{new_name}' already exist.")
+        elif new_name and new_name != contact.name:
+            contact = copy.deepcopy(contact)
+            contact.rename(new_name)
+            self.book.delete(name)
+            self.book.add(contact)
+
+        if phone:
+            contact.add_phone(phone)
+        if email:
+            contact.set_email(email)
+        if date:
+            contact.set_birthday(date)
+        message = Colorizer.success(f"Contact {name} updated.")
+
+        return message
 
     @input_error({IndexError: "New phone is required"})
-    def __edit_contact(self, *args) -> str:
+    def __edit_phone(self, *args) -> str:
         """
         Changes contact phone
         args: list[str] - command arguments
@@ -260,21 +304,32 @@ class ContactsHandler():
         
         return csv_as_table(to_csv(list(self.book.data.values())))
     
-    @input_error()
+    @input_error({ValueError: "Contact name is required to add address"})
     def __add_address(self, *args) -> str:
         """
         Adds address to contact
         args: list[str] - command arguments
         """
-        if len(args) != 6:
-            raise AddressValueError("All address fields must be provided.")
-        name, street, city, state, zip_code, country = args
+
+        name = args[0]
+
         contact = self.book.find(name)
 
         if contact is None:
-            return Colorizer.error("Contact not found")
-        
+            return Colorizer.warn("Contact not found")
+
+        fields = [
+            FieldInput(prompt="Street", validator=Street.validate, is_required=True),
+            FieldInput(prompt="City", validator=City.validate, is_required=True),
+            FieldInput(prompt="State", validator=None, is_required=False),
+            FieldInput(prompt="Zip code", validator=ZipCode.validate, is_required=True),
+            FieldInput(prompt="Country", validator=Country.validate, is_required=True),
+        ]
+
+        street, city, state, zip_code, country = command_data_collector(fields)
+
         contact.add_address(street, city, state, zip_code, country)
+
         return Colorizer.success(f"Contact {name} address added.")
 
     @input_error()
@@ -283,16 +338,26 @@ class ContactsHandler():
         Edits address of contact
         args: list[str] - command arguments
         """
-        if len(args) != 6:
-            raise AddressValueError("All address fields must be provided.")
-        name, street, city, state, zip_code, country = args
+        name = args[0]
+
         contact = self.book.find(name)
 
         if contact is None:
-            return Colorizer.error("Contact not found")
-        
+            return Colorizer.warn("Contact not found")
+
+        fields = [
+            FieldInput(prompt=f"Street ({contact.address.street})", validator=Street.validate, is_required=False),
+            FieldInput(prompt=f"City ({contact.address.city})", validator=City.validate, is_required=False),
+            FieldInput(prompt=f"State ({contact.address.state})", validator=None, is_required=False),
+            FieldInput(prompt=f"Zip code ({contact.address.zip_code})", validator=ZipCode.validate, is_required=False),
+            FieldInput(prompt=f"Country ({contact.address.country})", validator=Country.validate, is_required=False),
+        ]
+
+        street, city, state, zip_code, country = command_data_collector(fields)
+
         contact.edit_address(street, city, state, zip_code, country)
-        return Colorizer.success(f"Contact {name} address updated successfully.")
+
+        return Colorizer.success(f"Contact {name} address updated.")
     
     @input_error()
     def __delete_contact(self, *args) -> str:
