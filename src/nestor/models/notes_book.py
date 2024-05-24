@@ -67,11 +67,11 @@ class Note:
             self.tags.remove(tag)
 
     def edit_content(self, content: str):
-        """Change the content of the note."""
+        """Edit the content of the note."""
         self.content = Content(content) if content else None
 
     def edit_title(self, title: str):
-        """Change the title of the note."""
+        """Edit the title of the note."""
         self.title = Title(title) if title else None
 
     def edit_tags(self, tags: list[str]):
