@@ -371,11 +371,11 @@ class ContactsHandler():
             return Colorizer.warn("Contact not found")
 
         fields = [
-            FieldInput(prompt=f"Street ({contact.address.street})"),
-            FieldInput(prompt=f"City ({contact.address.city})", validator=City.validate),
-            FieldInput(prompt=f"State ({contact.address.state})", validator=State.validate),
-            FieldInput(prompt=f"Zip code ({contact.address.zip_code})", validator=ZipCode.validate),
-            FieldInput(prompt=f"Country ({contact.address.country})", validator=Country.validate),
+            FieldInput(prompt="Street", default_value=contact.address.street),
+            FieldInput(prompt="City", default_value=contact.address.city, validator=City.validate),
+            FieldInput(prompt="State", default_value=contact.address.state, validator=State.validate),
+            FieldInput(prompt="Zip code", default_value=contact.address.zip_code, validator=ZipCode.validate),
+            FieldInput(prompt="Country", default_value=contact.address.country, validator=Country.validate),
         ]
 
         address = command_data_collector(fields, self.cli)
