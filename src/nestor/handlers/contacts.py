@@ -149,18 +149,17 @@ class ContactsHandler():
 
         return message
     
-    @input_error({ValueError: "Contact editing interrupted. Contact not updated.", IndexError: "Name od the contact is required"})
+    @input_error({ValueError: "Contact editing interrupted. Contact not updated.", IndexError: "Name of the contact is required"})
     def __edit_contact(self, *args) -> str:
+        """
+        Edits contact in contacts dictionary
+        """
         name = args[0]
 
         contact = self.book.find(name)
 
         if contact is None:
             message = Colorizer.warn("Contact not found.")
-
-        """
-        Edits contact in contacts dictionary
-        """
 
         fields = [
             FieldInput(prompt=f"Name ({contact.name})", validator=Name.validate, is_required=False),
@@ -307,6 +306,11 @@ class ContactsHandler():
     
     @input_error({ValueError: "Contact name is required to add address"})
     def __add_address(self, *args) -> str:
+        """
+        Adds address to contact
+        args: list[str] - command arguments
+        """
+
         name = args[0]
 
         contact = self.book.find(name)
