@@ -14,6 +14,7 @@ class NotesHandler():
     ADD_NOTE = "add-note"
     DELETE_NOTE = "delete-note"
     CHANGE_NOTE = "change-note"
+    SEARCH_NOTES = "search-note"
 
     def __init__(self, book: NotesBook):
         self.book = book
@@ -29,7 +30,7 @@ class NotesHandler():
             NotesHandler.DELETE_NOTE,
             NotesHandler.ADD_NOTE,
             NotesHandler.CHANGE_NOTE,
-
+            NotesHandler.SEARCH_NOTES
         ]
 
     def handle(self, command: str, *args: list[str]) -> str:
@@ -47,6 +48,8 @@ class NotesHandler():
                 return self.__delete_note(*args)
             case NotesHandler.NOTES_COMMAND:
                 return self.__get_all_notes()
+            case NotesHandler.SEARCH_NOTES:
+                return self.__search_notes(*args)
             case _:
                 return Colorizer.error("Invalid command.")
 
@@ -95,6 +98,20 @@ class NotesHandler():
             message = Colorizer.warn(f"Note \"{title}\" deleted.")
 
         return message
+    
+    @input_error({IndexError: "Search string is required"})
+    def __search_notes(self, *args) -> str:
+        """
+        Searches notes by title, content
+        args: list[str] - command arguments
+        """
+        search_str = args[0]
+        notes = self.book.search(search_str)
+        
+        if not notes:
+            return Colorizer.warn("No notes found")
+        
+        return csv_as_table(to_csv(notes))
 
     @input_error()
     def __get_all_notes(self, *args) -> str:
