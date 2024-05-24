@@ -1,6 +1,8 @@
 from models.notes_book import NotesBook, Note
 from utils.input_error import input_error
 from services.colorizer import Colorizer
+from nestor.utils.to_csv import to_csv
+from nestor.utils.csv_as_table import csv_as_table
 
 class NotesHandler():
     """
@@ -48,7 +50,7 @@ class NotesHandler():
             case _:
                 return Colorizer.error("Invalid command.")
 
-    @input_error()
+    @input_error({ValueError: "Note title and content are required"})
     def __add_note(self, *args) -> str:
         """
         Adds note to notebook dictionary
@@ -65,10 +67,10 @@ class NotesHandler():
 
         return message
 
-    @input_error()
+    @input_error({ValueError: "Note title and content are required"})
     def __change_note(self, *args) -> str:
         """
-        Change (replace content) for note by given title
+        Change (replace) content for note by given title
         """
         title, content = args
         record = self.book.find(title)
@@ -81,7 +83,7 @@ class NotesHandler():
 
         return message
 
-    @input_error()
+    @input_error({ValueError: "Note title are required"})
     def __delete_note(self, *args) -> str:
         title = args[0]
         record = self.book.find(title)
@@ -99,4 +101,4 @@ class NotesHandler():
         if not self.book.data:
             return Colorizer.warn("Notes not found")
 
-        return Colorizer.highlight("\n".join([str(record) for record in self.book.data.values()]))
+        return csv_as_table(to_csv(list(self.book.data.values())))
