@@ -94,6 +94,17 @@ class NotesBook(UserDict):
         """Delete a Note from the NotesBook by its title."""
         del self.data[title]
 
+    def search(self, search_str: str) -> list[Note]:
+        """Search records by title and content."""
+
+        result = []
+        for record in self.data.values():
+            if (search_str.lower() in str(record.title).lower() or
+                (search_str.lower() in str(record.content).lower())):
+                result.append(record)
+        return result
+
+
     def __str__(self):
         """Return a string representation of all notes in the NotesBook."""
         notes_str = "\n".join(str(note) for note in self.data.values())
