@@ -11,3 +11,7 @@ Nestor is a CLI assistant to manage contact and notes
 ## Run
 
 - `nestor` run script to start work with address book
+
+## Commands
+
+- Run `help` command to get details about all supported commands
