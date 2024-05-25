@@ -1,5 +1,3 @@
-import copy
-
 from nestor.handlers.command_data_collector import FieldInput, command_data_collector
 from nestor.models.notes_book import Content, NotesBook, Note, Title
 from nestor.services.ui import UserInterface
@@ -18,7 +16,9 @@ class NotesHandler():
     ADD_NOTE = "add-note"
     DELETE_NOTE = "delete-note"
     EDIT_NOTE = "edit-note"
-    SEARCH_NOTES = "search-note"
+    ADD_NOTE_TAGS = "add-note-tags"
+    DELETE_NOTE_TAGS = "delete-note-tags"
+    SEARCH_NOTES = "search-notes"
 
     def __init__(self, book: NotesBook, cli: UserInterface):
         self.book = book
@@ -35,7 +35,9 @@ class NotesHandler():
             NotesHandler.ADD_NOTE,
             NotesHandler.EDIT_NOTE,
             NotesHandler.DELETE_NOTE,
-            NotesHandler.SEARCH_NOTES
+            NotesHandler.SEARCH_NOTES,
+            NotesHandler.ADD_NOTE_TAGS,
+            NotesHandler.DELETE_NOTE_TAGS
         ]
 
     def handle(self, command: str, *args: list[str]) -> str:
@@ -55,6 +57,10 @@ class NotesHandler():
                 return self.__get_all_notes()
             case NotesHandler.SEARCH_NOTES:
                 return self.__search_notes(*args)
+            case NotesHandler.ADD_NOTE_TAGS:
+                return self.__add_note_tags(*args)
+            case NotesHandler.DELETE_NOTE_TAGS:
+                return self.__delete_note_tags(*args)
             case _:
                 return Colorizer.error("Invalid command.")
 
@@ -69,9 +75,8 @@ class NotesHandler():
             FieldInput(prompt="Tags (separated by semicolon)"),
         ]
 
-        title, content, tags = command_data_collector(fields, self.cli)
-        tags = map(lambda x: x.strip(), tags.split(";")) if tags else []
-        tags = list(filter(lambda x: x, tags))
+        title, content, tags_str = command_data_collector(fields, self.cli)
+        tags = self.__tags_from_str(tags_str)
 
         note = self.book.find(title)
 
@@ -100,9 +105,8 @@ class NotesHandler():
                 FieldInput(prompt="Content", default_value=record.content, validator=Content.validate, is_required=True),
                 FieldInput(prompt="Tags (separated by semicolon)", default_value="; ".join(record.tags) if record.tags else ""),
             ]
-            new_title, content, tags = command_data_collector(fields, self.cli)
-            tags = map(lambda x: x.strip(), tags.split(";")) if tags else []
-            tags = list(filter(lambda x: x, tags))
+            new_title, content, tags_str = command_data_collector(fields, self.cli)
+            tags = self.__tags_from_str(tags_str)
 
             if new_title and new_title != record.title.value and self.book.find(new_title):
                 return Colorizer.warn(f"Note with title '{new_title}' already exist.")
@@ -120,6 +124,7 @@ class NotesHandler():
 
         return message
 
+
     @input_error({ValueError: "Note title are required"})
     def __delete_note(self, *args) -> str:
         title = args[0]
@@ -132,7 +137,8 @@ class NotesHandler():
             message = Colorizer.warn(f"Note \"{title}\" deleted.")
 
         return message
-    
+
+
     @input_error({IndexError: "Search string is required"})
     def __search_notes(self, *args) -> str:
         """
@@ -141,15 +147,60 @@ class NotesHandler():
         """
         search_str = args[0]
         notes = self.book.search(search_str)
-        
+
         if not notes:
             return Colorizer.warn("No notes found")
-        
+
         return csv_as_table(to_csv(notes))
 
+
+    @input_error({ValueError: "Note title and tags are required"})
+    def __add_note_tags(self, *args) -> str:
+        """
+        Adds tags to note in notebook dictionary
+        """
+
+        title, tags_str = args
+        tags = self.__tags_from_str(tags_str)
+        note = self.book.find(title)
+
+        if note is None:
+            message = Colorizer.warn(f"Could not find Note \"{title}\".")
+        else:
+            note.add_tags(tags)
+            message = Colorizer.success(f"Tags added for Note \"{title}\".")
+
+        return message
+
+
+    @input_error({IndexError: "Note title is required"})
+    def __delete_note_tags(self, *args) -> str:
+        """
+        Remove tags from note in notebook dictionary
+        """
+        title = args[0]
+        note = self.book.find(title)
+
+        if note is None:
+            message = Colorizer.warn(f"Could not find Note \"{title}\".")
+        else:
+            note.delete_tags()
+            message = Colorizer.success(f"Tags deleted for Note \"{title}\".")
+
+        return message
+
+
     @input_error()
-    def __get_all_notes(self, *args) -> str:
+    def __get_all_notes(self) -> str:
         if not self.book.data:
             return Colorizer.warn("Notes not found")
 
         return csv_as_table(to_csv(list(self.book.data.values())))
+    
+    def __tags_from_str(self, tags_str: str) -> list[str]:
+        """
+        Converts tags string to list of tags
+        tags_str: str - tags string
+        """
+        tags = map(lambda x: x.strip(), tags_str.split(";")) if tags_str else []
+        return list(filter(lambda x: x, tags))

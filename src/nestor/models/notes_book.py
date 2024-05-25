@@ -46,7 +46,7 @@ class Content(Field):
 
         self._value = value
 
-        
+
 class Note:
     """Class representing a record for NotesBook."""
 
@@ -56,16 +56,6 @@ class Note:
         self.tags = tags if tags else []  # Initialize tags
         self.content = Content(content) if content else None  # Initialize note content
 
-    def add_tag(self, tag: str):
-        """Add a new tag to the note if it does not already exist."""
-        if tag not in self.tags:
-            self.tags.append(tag)
-
-    def delete_tag(self, tag: str):
-        """Delete a tag for the note if it exists."""
-        if tag in self.tags:
-            self.tags.remove(tag)
-
     def edit_content(self, content: str):
         """Edit the content of the note."""
         self.content = Content(content) if content else None
@@ -74,16 +64,26 @@ class Note:
         """Edit the title of the note."""
         self.title = Title(title) if title else None
 
+    def add_tags(self, tags: list[str]):
+        """Add a new tag to the note if it does not already exist."""
+        for tag in tags:
+            if tag not in self.tags:
+                self.tags.append(tag)
+
     def edit_tags(self, tags: list[str]):
         """Edit a tags for the note if it exists."""
         self.tags = tags if tags else []
 
+    def delete_tags(self):
+        """Delete a tag from the note if it exists."""
+        self.tags = []
+
     def __str__(self):
         """Return a string representation of the note."""
 
-        tags_str = ", ".join(self.tags) if self.tags else "No tags"
         content_str = self.content if self.content else "No content"
-        return f"Title: {self.title}, Tags: {tags_str}, \n Content: {content_str}"
+        tags_str = "; ".join(self.tags) if self.tags else "No tags"
+        return f"Title: {self.title}, Tags: {tags_str}, \nContent: {content_str}"
 
 
 class NotesBook(UserDict):
@@ -107,7 +107,8 @@ class NotesBook(UserDict):
         result = []
         for record in self.data.values():
             if (search_str.lower() in str(record.title).lower() or
-                (search_str.lower() in str(record.content).lower())):
+                (search_str.lower() in str(record.content).lower()) or
+                (search_str.lower() in str(record.tags).lower())):
                 result.append(record)
         return result
 
