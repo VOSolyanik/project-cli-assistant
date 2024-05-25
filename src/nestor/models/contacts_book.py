@@ -1,9 +1,8 @@
 import re
-from typing import Dict, Type
 from collections import UserDict
 from datetime import datetime, timedelta, date
 
-from nestor.models.constants import NOT_SPECIFIED_FIELD_VALUE
+from nestor.models.constants import EMPTY_FIELD_VALUE
 from nestor.models.exceptions import AddressValueError, NameValueError, PhoneValueError, BirthdayValueError, EmailValueError
 
 class Field:
@@ -213,9 +212,10 @@ class Contact:
         self.address = None
 
     def __str__(self):
-        return f"Contact name: {self.name}, phones: {'; '.join(p.value for p in self.phones)}, birthday: {self.birthday or NOT_SPECIFIED_FIELD_VALUE}, email: {self.email or NOT_SPECIFIED_FIELD_VALUE}, address: {self.address or NOT_SPECIFIED_FIELD_VALUE}"
+        return f"Name: {self.name}, phones: {'; '.join(p.value for p in self.phones)}, birthday: {self.birthday or EMPTY_FIELD_VALUE}, email: {self.email or EMPTY_FIELD_VALUE}, address: {self.address or EMPTY_FIELD_VALUE}"
     
     def rename(self, new_name: str) -> None:
+        """Rename contact."""
         self.name = Name(new_name)
 
     def add_phone(self, phone: str) -> None:
@@ -244,7 +244,7 @@ class Contact:
         self.email = Email(email)
 
     def remove_email(self) -> None:
-        """Set email in record if it exists."""
+        """Remove email from record."""
         self.email = None
     
     def set_birthday(self, birthday: str) -> None:
@@ -261,6 +261,10 @@ class Contact:
             self.address = Address(street, city, state, zip_code, country)
         else:
             self.address.edit(street, city, state, zip_code, country)
+
+    def remove_address(self):
+        """Remove address from record."""
+        self.address = None
     
 
 class ContactsBook(UserDict):

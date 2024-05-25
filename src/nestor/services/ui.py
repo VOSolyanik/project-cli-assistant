@@ -1,7 +1,9 @@
 
 from prompt_toolkit import prompt
 from prompt_toolkit.styles import Style
+from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.completion import Completer, WordCompleter, PathCompleter
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 
 class ContextualCompleter(Completer):
     def __init__(self, commands: list[str]):
@@ -44,18 +46,24 @@ class CommandLineInterface(UserInterface):
         prompt(text: str, completion: list[str]) -> str: Prompts the user with the given text and a list of possible completions, and returns the user's input as a string.
     """
     style = Style.from_dict({
-        'prompt': '#0000ab',
+        'prompt': '#4f8dd4',
         'input': '#000000'
     })
+
+    def __init__(self):
+        self.history = InMemoryHistory()
+        self.auto_suggest = AutoSuggestFromHistory()
 
     def output(self, text: str) -> None:
         """ Prints the given text."""
         print(text)
 
-    def prompt(self, text: str, default_value: str = None, completion: list[str] = None) -> str:
+    def prompt(self, text: str, default_value: str = None, completion: list[str] = None, skip_history: bool = False) -> str:
         return prompt(
                 message=text,
                 default=default_value if default_value else "",
                 completer=ContextualCompleter(completion if completion else []),
+                history=self.history if not skip_history else None,
+                auto_suggest=self.auto_suggest,
                 style=CommandLineInterface.style
             )
