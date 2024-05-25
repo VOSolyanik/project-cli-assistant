@@ -47,59 +47,53 @@ class Content(Field):
         self._value = value
 
 
-class Tags(Field):
-    """Class representing a tags."""
-    def __str__(self):
-        return ', '.join(self.value) if self.value else '-'
-
-    def __add__(self, other: list):
-        return __class__(self.value + other)
-
-    def __len__(self):
-        return len(self.value)
-
-
 class Note:
     """Class representing a record for NotesBook."""
 
     def __init__(self, title, content=None, tags=None):
         """Initialize a new Note."""
         self.title = Title(title)
-        self.tags = Tags(tags) if tags else []  # Initialize tags
+        self.tags = tags if tags else []  # Initialize tags
         self.content = Content(content) if content else None  # Initialize note content
 
-    def add_tags(self, tag: str):
+    def edit_content(self, content: str):
+        """Edit the content of the note."""
+        self.content = Content(content) if content else None
+
+    def edit_title(self, title: str):
+        """Edit the title of the note."""
+        self.title = Title(title) if title else None
+
+    def add_tags(self, tags: list[str]):
         """Add a new tag to the note if it does not already exist."""
-        self.tags = self.tags + tag
+        for tag in tags:
+            if tag not in self.tags:
+                self.tags.append(tag)
+
+    def edit_tags(self, tags: list[str]):
+        """Edit a tags for the note if it exists."""
+        self.tags = tags if tags else []
 
     def delete_tags(self):
         """Delete a tag from the note if it exists."""
         self.tags = []
 
-    def change_content(self, content: str):
-        """Change the content of the note."""
-        self.content = Content(content) if content else None
-
-    def change_tags(self, tags: list):
-        """Change tags of the note."""
-        self.tags = tags
-
     def __str__(self):
         """Return a string representation of the note."""
 
         content_str = self.content if self.content else "No content"
-        return f"Title: {self.title}, Tags: [{self.tags}], \n Content: {content_str}"
-
+        tags_str = "; ".join(self.tags) if self.tags else "No tags"
+        return f"Title: {self.title}, Tags: {tags_str}, \nContent: {content_str}"
 
 
 class NotesBook(UserDict):
     """Class representing a NotesBook."""
 
-    def add_note(self, note: Note):
+    def add(self, note: Note):
         """Add a Note to the NotesBook."""
         self.data[note.title.value] = note
 
-    def find(self, title: str):
+    def find(self, title: str) -> Note | None:
         """Find a Note by its title."""
         return self.data.get(title, None)
 
