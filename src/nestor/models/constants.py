@@ -1,1 +1,1 @@
-NOT_SPECIFIED_FIELD_VALUE = 'not specified'
+EMPTY_FIELD_VALUE = "not specified"

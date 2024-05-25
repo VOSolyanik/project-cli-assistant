@@ -9,9 +9,8 @@ def to_csv(data_list: list) -> str:
         row = []
         for value in contact.__dict__.values():
             if isinstance(value, list):
-                row.append(";".join([str(item) for item in value]))
+                row.append(",".join([str(item) for item in value]))
             else:
-                row.append(str(value))
+                row.append(str(value) if value else "")
         rows.append(";".join(row))
-        
     return header + "\n" + "\n".join(rows)

@@ -1,10 +1,9 @@
 import re
-from typing import Dict, Type
 from collections import UserDict
 from datetime import datetime, timedelta, date
 
-from nestor.models.constants import NOT_SPECIFIED_FIELD_VALUE
-from nestor.models.exceptions import NameValueError, PhoneValueError, BirthdayValueError, EmailValueError
+from nestor.models.constants import EMPTY_FIELD_VALUE
+from nestor.models.exceptions import AddressValueError, NameValueError, PhoneValueError, BirthdayValueError, EmailValueError
 
 class Field:
     """Base class for fields."""
@@ -13,7 +12,7 @@ class Field:
         self.value = value
     
     def __str__(self):
-        return str(self._value)
+        return str(self._value) if self._value else ""
     
     def __repr__(self):
         return str(self)
@@ -103,17 +102,106 @@ class Birthday(Field):
         Birthday.validate(value)
 
         self._value = Birthday.parse(value)
+
+class Street(Field):
+    """Class representing street name from address."""
+
+    @property
+    def value(self):
+        return self._value
+    
+    @value.setter
+    def value(self, value: str):
+        self._value = value
+
+class City(Field):
+    """Class representing city from address."""
+
+    @staticmethod
+    def validate(value: str) -> None:
+        if not value[0].isupper():
+            raise AddressValueError("City name should start with capital letter")
+                                 
+    @property
+    def value(self):
+        return self._value
+    
+    @value.setter
+    def value(self, value: str):
+        City.validate(value)
+        
+        self._value = value
+
+class State(Field):
+    """Class representing state from address."""
+
+    @staticmethod
+    def validate(value: str) -> None:
+        if not value[0].isupper():
+            raise AddressValueError("State name should start with capital letter")
+                 
+    @property
+    def value(self):
+        return self._value
+    
+    @value.setter
+    def value(self, value: str):
+        self._value = value
+
+class ZipCode(Field):
+    """Class representing zip code from address."""
+
+    @staticmethod
+    def validate(value: str) -> None:
+        if not value.isdigit():
+            raise AddressValueError("Zip code must contain only digits")
+                                 
+    @property
+    def value(self):
+        return self._value
+    
+    @value.setter
+    def value(self, value: str):
+        ZipCode.validate(value)
+        
+        self._value = value
+
+class Country(Field):
+    """Class representing country from address."""
+
+    @staticmethod
+    def validate(value: str) -> None:
+        if not value[0].isupper():
+            raise AddressValueError("Country name should start with capital letter")
+                                 
+    @property
+    def value(self):
+        return self._value
+    
+    @value.setter
+    def value(self, value: str):
+        Country.validate(value)
+        
+        self._value = value
         
 class Address:
-    def __init__(self, street, city, state, zip_code, country):
-        self.street = street
-        self.city = city
-        self.state = state
-        self.zip_code = zip_code
-        self.country = country
+    def __init__(self, street: str = None, city: str = None, state: str = None, zip_code: str = None, country: str = None):
+        self.street = Street(street) if street else None
+        self.city = City(city) if city else None
+        self.state = State(state) if state else None
+        self.zip_code = ZipCode(zip_code) if zip_code else None
+        self.country = Country(country) if country else None
+
+    def edit(self, street: str = None, city: str = None, state: str = None, zip_code: str = None, country: str = None):
+        self.street = Street(street) if street else self.street
+        self.city = City(city) if city else self.city
+        self.state = State(state) if state else self.state
+        self.zip_code = ZipCode(zip_code) if zip_code else self.zip_code
+        self.country = Country(country) if country else self.country
 
     def __str__(self):
-        return f"{self.street}, {self.city}, {self.state}, {self.zip_code}, {self.country}"
+        fields: list[Field] = [self.street, self.city, self.state, self.zip_code, self.country]
+        return ', '.join([str(f) for f in fields if f is not None])
     
 class Contact:
     """Contact class for storing contact information."""
@@ -125,8 +213,12 @@ class Contact:
         self.address = None
 
     def __str__(self):
-        return f"Contact name: {self.name}, phones: {'; '.join(p.value for p in self.phones)}, birthday: {self.birthday or NOT_SPECIFIED_FIELD_VALUE}, email: {self.email or NOT_SPECIFIED_FIELD_VALUE}, address: {self.address or NOT_SPECIFIED_FIELD_VALUE}"
+        return f"Name: {self.name}, Phones: {'; '.join(p.value for p in self.phones)}, Birth date: {self.birthday or EMPTY_FIELD_VALUE}, Email: {self.email or EMPTY_FIELD_VALUE}, Address: {self.address or EMPTY_FIELD_VALUE}"
     
+    def rename(self, new_name: str) -> None:
+        """Rename contact."""
+        self.name = Name(new_name)
+
     def add_phone(self, phone: str) -> None:
         """Add phone to record if it's valid, otherwise handle ValueError."""
         self.phones.append(Phone(phone))
@@ -153,7 +245,7 @@ class Contact:
         self.email = Email(email)
 
     def remove_email(self) -> None:
-        """Set email in record if it exists."""
+        """Remove email from record."""
         self.email = None
     
     def set_birthday(self, birthday: str) -> None:
@@ -169,11 +261,11 @@ class Contact:
         if not self.address:
             self.address = Address(street, city, state, zip_code, country)
         else:
-            self.address.street = street if street else self.address.street
-            self.address.city = city if city else self.address.city
-            self.address.state = state if state else self.address.state
-            self.address.zip_code = zip_code if zip_code else self.address.zip_code
-            self.address.country = country if country else self.address.country
+            self.address.edit(street, city, state, zip_code, country)
+
+    def remove_address(self):
+        """Remove address from record."""
+        self.address = None
     
 
 class ContactsBook(UserDict):
@@ -203,17 +295,18 @@ class ContactsBook(UserDict):
                 result.append(record)
         return result
     
-    def get_upcoming_birthdays(self, days: int) -> dict:
-        """Return dict of contacts with upcoming birthdays within the given days."""
+    def get_upcoming_birthdays(self, days: int, start_days: int = 0) -> dict:
+        """Return dict of contacts with upcoming birthdays within the given number of days starting from start_days."""
         today = datetime.today().date()
+        start_date = today + timedelta(days=start_days)
         upcoming_birthdays = {}
-
+        
         # Iterate through all users
         for record in self.data.values():
             if record.birthday is None:
                 continue
 
-            birthdate: Birthday = record.birthday.value
+            birthdate: datetime = record.birthday.value
             name: str = record.name.value
             # Calculate this year's birthday
             birthdate_this_year = birthdate.replace(year=today.year)
@@ -224,7 +317,7 @@ class ContactsBook(UserDict):
             # Calculate days to birthday
             days_to_birthday = (birthdate_this_year - today).days
 
-            if days_to_birthday <= days:
+            if start_days <= days_to_birthday <= start_days + days:
                 congratulation_date = birthdate_this_year
                 # If congratulation date is weekend, calculate next week's date
                 if birthdate_this_year.weekday() >= 5:
@@ -233,4 +326,3 @@ class ContactsBook(UserDict):
                 upcoming_birthdays[name] = congratulation_date
 
         return upcoming_birthdays
-    

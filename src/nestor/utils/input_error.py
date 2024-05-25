@@ -1,7 +1,7 @@
 from functools import wraps
 
 from nestor.services.colorizer import Colorizer
-from nestor.models.exceptions import ContactsBookException
+from nestor.models.exceptions import ContactsBookException, NotesBookException
 
 def input_error(errors_config: dict = {}):
     """
@@ -22,11 +22,15 @@ def input_error(errors_config: dict = {}):
             except KeyError as e:
                 return Colorizer.error(f"Contact {e} not found")
             except ContactsBookException as e:
+                return Colorizer.error(e)            
+            except NotesBookException as e:
                 return Colorizer.error(e)
             except ValueError as e:
                 return Colorizer.error(errors[ValueError])
             except IndexError as e:
                 return Colorizer.error(errors[IndexError])
+            except KeyboardInterrupt as e:
+                return Colorizer.error(errors[KeyboardInterrupt])
         return inner
     return wrapper
 

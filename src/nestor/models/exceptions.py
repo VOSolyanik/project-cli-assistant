@@ -18,3 +18,12 @@ class EmailValueError(ContactsBookException):
 
 class AddressValueError(ContactsBookException):
     pass
+
+class NotesBookException(Exception):
+    pass
+
+class TitleValueError(NotesBookException):
+    pass
+
+class ContentValueError(NotesBookException):
+    pass
