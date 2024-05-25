@@ -2,7 +2,7 @@ import copy
 
 from nestor.handlers.base import CommandsHandler
 from nestor.handlers.command_data_collector import FieldInput, command_data_collector
-from nestor.models.constants import CONTACT_NOT_FOUND, PHONE_NOT_FOUND
+from nestor.handlers.constants import CONTACT_NOT_FOUND, PHONE_NOT_FOUND
 from nestor.models.contacts_book import City, ContactsBook, Contact, Birthday, Country, Email, Name, Phone, State, ZipCode
 from nestor.services.ui import UserInterface
 from nestor.services.colorizer import Colorizer
@@ -78,7 +78,6 @@ class ContactsHandler(CommandsHandler):
             ContactsHandler.CONTACTS_COMMAND,
             ContactsHandler.SEARCH_CONTACTS_COMMAND
         ]
-
     def handle(self, command: str, *args: list[str]) -> str:
         """
         Handles user commands
@@ -124,6 +123,33 @@ class ContactsHandler(CommandsHandler):
                 return self.__search_contacts(*args)
             case _:
                 return Colorizer.error("Invalid command.")
+            
+    def help(self, command=None):
+        """
+        Returns help information for all available commands.
+        """
+        commands = {
+            ContactsHandler.ADD_CONTACT_COMMAND: "Add a new contact.\nExample: add-contact\nFollow the prompts to enter the name, phone, date of birth, email and address for the contact.",
+            ContactsHandler.EDIT_CONTACT_COMMAND: "Edit an existing contact.\nExample: edit-contact \"John Doe\"\nFollow the prompts to edit the name, phone, date of birth, email and address for the contact.",
+            ContactsHandler.DELETE_CONTACT_COMMAND: "Delete an existing contact.\nExample: delete-contact \"John Doe\"",
+            ContactsHandler.PHONE_COMMAND: "Get phone numbers for a contact.\nExample: phone \"John Doe\"",
+            ContactsHandler.ADD_PHONE_COMMAND: "Add a phone number to a contact.\nExample: add-phone \"John Doe\" 1234567890",
+            ContactsHandler.EDIT_PHONE_COMMAND: "Edit a phone number for a contact.\nExample: edit-phone \"John Doe\" 1234567890 0987654321",
+            ContactsHandler.DELETE_PHONE_COMMAND: "Delete a phone number from a contact.\nExample: delete-phone \"John Doe\" 1234567890",
+            ContactsHandler.ADD_EMAIL_COMMAND: "Add or edit an email for a contact.\nExample: add-email \"John Doe\" john.doe@example.com",
+            ContactsHandler.SHOW_EMAIL_COMMAND: "Get email for a contact.\nExample: show-email \"John Doe\"",
+            ContactsHandler.DELETE_EMAIL_COMMAND: "Delete email for a contact.\nExample: delete-email \"John Doe\"",
+            ContactsHandler.ADD_BIRTHDAY_COMMAND: "Add or edit birthday for a contact.\nExample: add-birthday \"John Doe\" 01.12.1992",
+            ContactsHandler.SHOW_BIRTHDAY_COMMAND: "Get birthday for a contact.\nExample: show-birthday \"John Doe\"",
+            ContactsHandler.BIRTHDAYS_COMMAND: "Get upcoming birthdays.\nExamples:\n  birthdays this week\n  birthdays this month\n  birthdays next week\n  birthdays next month\n  birthdays 7",
+            ContactsHandler.ADD_ADDRESS: "Add an address to a contact.\nExample: add-address \"John Doe\"\nFollow the prompts to enter the street, city, state, zip code, and country for the address.",
+            ContactsHandler.EDIT_ADDRESS: "Edit address of a contact.\nExample: edit-address \"John Doe\"\nFollow the prompts to edit the street, city, state, zip code, and country for the address.",
+            ContactsHandler.DELETE_ADDRESS: "Delete address of a contact.\nExample: delete-address \"John Doe\"",
+            ContactsHandler.CONTACTS_COMMAND: "Get all contacts.\nExample: contacts",
+            ContactsHandler.SEARCH_CONTACTS_COMMAND: "Search contacts by name, email, or address.\nExample: search-contacts John",
+        }
+
+        return self._get_help_message(commands, "Available commands for contacts management:", command)
             
     @input_error({KeyboardInterrupt: "Contact adding interrupted. Contact not added."})
     def __add_contact(self) -> str:

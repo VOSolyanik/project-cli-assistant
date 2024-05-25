@@ -64,6 +64,19 @@ class NotesHandler(CommandsHandler):
                 return self.__delete_note_tags(*args)
             case _:
                 return Colorizer.error("Invalid command.")
+    
+    def help(self, command=None):
+        commands = {
+            self.NOTES_COMMAND: "Display all notes.\nExample: notes",
+            self.ADD_NOTE: "Adds a new note.\nExample: add-note\nFollow the prompts to enter the title, content, and tags (optional) for the note.",
+            self.EDIT_NOTE: "Edit ann existing note.\nExample: edit-note \"Recipe of a pie\"\nFollow the prompts to enter the new title, content, and tags (optional) for the note.",
+            self.DELETE_NOTE: "Delete an existing note.\nExample: delete-note \"Recipe of a pie\"",
+            self.SEARCH_NOTES: "Search for notes by title, content, or tags.\nExample: search-notes \"pie\"",
+            self.ADD_NOTE_TAGS: "Add tags to an existing note.\nExample: add-note-tags \"Recipe of a pie\" \"food; recipe\"",
+            self.DELETE_NOTE_TAGS: "Delete tags from an existing note.\nExample: delete-note-tags \"Recipe of a pie\"",
+        }
+
+        return self._get_help_message(commands, "Available commands for notes management:", command)
 
     @input_error({KeyboardInterrupt: "Note adding interrupted. Note not added."})
     def __add_note(self) -> str:

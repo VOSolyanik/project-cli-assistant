@@ -213,7 +213,7 @@ class Contact:
         self.address = None
 
     def __str__(self):
-        return f"Name: {self.name}, phones: {'; '.join(p.value for p in self.phones)}, birthday: {self.birthday or EMPTY_FIELD_VALUE}, email: {self.email or EMPTY_FIELD_VALUE}, address: {self.address or EMPTY_FIELD_VALUE}"
+        return f"Name: {self.name}, Phones: {'; '.join(p.value for p in self.phones)}, Birth date: {self.birthday or EMPTY_FIELD_VALUE}, Email: {self.email or EMPTY_FIELD_VALUE}, Address: {self.address or EMPTY_FIELD_VALUE}"
     
     def rename(self, new_name: str) -> None:
         """Rename contact."""
