@@ -1,17 +1,18 @@
 import copy
 
+from nestor.handlers.base import CommandsHandler
 from nestor.handlers.command_data_collector import FieldInput, command_data_collector
 from nestor.models.constants import CONTACT_NOT_FOUND, PHONE_NOT_FOUND
-from nestor.services.ui import UserInterface
-from nestor.utils.csv_as_table import csv_as_table
-from nestor.utils.get_days_range import get_days_range
-from nestor.utils.input_error import input_error
 from nestor.models.contacts_book import City, ContactsBook, Contact, Birthday, Country, Email, Name, Phone, State, ZipCode
+from nestor.services.ui import UserInterface
 from nestor.services.colorizer import Colorizer
+from nestor.utils.input_error import input_error
 from nestor.utils.similar_strings import similar_strings
 from nestor.utils.to_csv import to_csv
+from nestor.utils.csv_as_table import csv_as_table
+from nestor.utils.get_days_range import get_days_range
 
-class ContactsHandler():
+class ContactsHandler(CommandsHandler):
     """
     Contacts handler class
     book: ContactsBook - contacts book instance
@@ -191,7 +192,7 @@ class ContactsHandler():
                 FieldInput(prompt="Country", default_value=contact.address.country, validator=Country.validate),
             ]),
         ]
-
+         
         new_name, phone, date, email, address = command_data_collector(fields, self.cli)
 
         if new_name and new_name != str(contact.name) and self.book.find(new_name):

@@ -84,5 +84,5 @@ def command_data_collector(fields: list[FieldInput], cli: UserInterface, indent 
                 default_value = prompt[1]
                 prompt = prompt[0]
         except StopIteration as e:
-            return e.value
+            return list(e.value)
             

@@ -1,12 +1,13 @@
+from nestor.handlers.base import CommandsHandler
 from nestor.handlers.command_data_collector import FieldInput, command_data_collector
 from nestor.models.notes_book import Content, NotesBook, Note, Title
 from nestor.services.ui import UserInterface
-from nestor.utils.input_error import input_error
 from nestor.services.colorizer import Colorizer
+from nestor.utils.input_error import input_error
 from nestor.utils.csv_as_table import csv_as_table
 from nestor.utils.to_csv import to_csv
 
-class NotesHandler():
+class NotesHandler(CommandsHandler):
     """
     Notes handler class
     book: NotesBook - notes book instance
@@ -92,7 +93,7 @@ class NotesHandler():
     @input_error({KeyboardInterrupt: "Note editing interrupted. Note not updated.", IndexError: "Note title is required"})
     def __edit_note(self, *args) -> str:
         """
-        Change (replace) content for note by given title
+        Edit note in notebook dictionary
         """
         title = args[0]
         record = self.book.find(title)
@@ -125,7 +126,7 @@ class NotesHandler():
         return message
 
 
-    @input_error({ValueError: "Note title are required"})
+    @input_error({IndexError: "Note title is required"})
     def __delete_note(self, *args) -> str:
         title = args[0]
         record = self.book.find(title)
@@ -142,8 +143,7 @@ class NotesHandler():
     @input_error({IndexError: "Search string is required"})
     def __search_notes(self, *args) -> str:
         """
-        Searches notes by title, content
-        args: list[str] - command arguments
+        Searches notes by title, content and tags
         """
         search_str = args[0]
         notes = self.book.search(search_str)
@@ -197,10 +197,13 @@ class NotesHandler():
 
         return csv_as_table(to_csv(list(self.book.data.values())))
     
-    def __tags_from_str(self, tags_str: str) -> list[str]:
+    def __tags_from_str(self, tags_str: str | None) -> list[str]:
         """
         Converts tags string to list of tags
         tags_str: str - tags string
         """
+        if not tags_str:
+            return []
+        
         tags = map(lambda x: x.strip(), tags_str.split(";")) if tags_str else []
         return list(filter(lambda x: x, tags))

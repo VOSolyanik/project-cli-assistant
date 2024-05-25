@@ -11,6 +11,6 @@ def to_csv(data_list: list) -> str:
             if isinstance(value, list):
                 row.append(",".join([str(item) for item in value]))
             else:
-                row.append(str(value))
+                row.append(str(value) if value else "")
         rows.append(";".join(row))
     return header + "\n" + "\n".join(rows)

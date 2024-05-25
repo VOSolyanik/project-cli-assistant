@@ -12,7 +12,7 @@ class Field:
         self.value = value
     
     def __str__(self):
-        return str(self._value)
+        return str(self._value) if self._value else ""
     
     def __repr__(self):
         return str(self)
@@ -185,7 +185,7 @@ class Country(Field):
         self._value = value
         
 class Address:
-    def __init__(self, street: str, city: str, state: str, zip_code: str, country: str):
+    def __init__(self, street: str = None, city: str = None, state: str = None, zip_code: str = None, country: str = None):
         self.street = Street(street) if street else None
         self.city = City(city) if city else None
         self.state = State(state) if state else None
@@ -200,7 +200,8 @@ class Address:
         self.country = Country(country) if country else self.country
 
     def __str__(self):
-        return f"{self.street}, {self.city}{(', ' + str(self.state)) if not self.state is None else ''}{(', ' + str(self.zip_code)) if not self.zip_code is None else ''}, {self.country}"
+        fields: list[Field] = [self.street, self.city, self.state, self.zip_code, self.country]
+        return ', '.join([str(f) for f in fields if f is not None])
     
 class Contact:
     """Contact class for storing contact information."""
